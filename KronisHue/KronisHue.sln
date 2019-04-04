@@ -1,0 +1,51 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28729.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KronisHue.Android", "KronisHue\KronisHue.Android\KronisHue.Android.csproj", "{AD102247-D9C8-4E42-9459-53A3FA348D30}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KronisHue", "KronisHue\KronisHue\KronisHue.csproj", "{8380ADE8-E4C6-47D9-A00C-728720755CEA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KronisHueLib", "KronisHueLib\KronisHueLib.csproj", "{B65DFC47-3628-4BA1-983A-94053528ADB3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "ConsoleApp\ConsoleApp.csproj", "{917DF4F5-2FAA-46AF-AE00-EECBA811A622}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SsdpRadar", "SsdpRadar\SsdpRadar.csproj", "{400C95D2-D3B2-4F63-B5EA-E3E472DBFF13}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AD102247-D9C8-4E42-9459-53A3FA348D30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD102247-D9C8-4E42-9459-53A3FA348D30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD102247-D9C8-4E42-9459-53A3FA348D30}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{AD102247-D9C8-4E42-9459-53A3FA348D30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD102247-D9C8-4E42-9459-53A3FA348D30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD102247-D9C8-4E42-9459-53A3FA348D30}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{8380ADE8-E4C6-47D9-A00C-728720755CEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8380ADE8-E4C6-47D9-A00C-728720755CEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8380ADE8-E4C6-47D9-A00C-728720755CEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8380ADE8-E4C6-47D9-A00C-728720755CEA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B65DFC47-3628-4BA1-983A-94053528ADB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B65DFC47-3628-4BA1-983A-94053528ADB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B65DFC47-3628-4BA1-983A-94053528ADB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B65DFC47-3628-4BA1-983A-94053528ADB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{917DF4F5-2FAA-46AF-AE00-EECBA811A622}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{917DF4F5-2FAA-46AF-AE00-EECBA811A622}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{917DF4F5-2FAA-46AF-AE00-EECBA811A622}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{917DF4F5-2FAA-46AF-AE00-EECBA811A622}.Release|Any CPU.Build.0 = Release|Any CPU
+		{400C95D2-D3B2-4F63-B5EA-E3E472DBFF13}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{400C95D2-D3B2-4F63-B5EA-E3E472DBFF13}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{400C95D2-D3B2-4F63-B5EA-E3E472DBFF13}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{400C95D2-D3B2-4F63-B5EA-E3E472DBFF13}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {67E00597-9171-47B0-B570-6585441467FE}
+	EndGlobalSection
+EndGlobal

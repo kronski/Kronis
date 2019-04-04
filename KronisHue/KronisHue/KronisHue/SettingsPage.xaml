@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="KronisHue.SettingsPage">
+    <ContentPage.Content>
+        <StackLayout>
+            <Label Text="KronisHue" HorizontalOptions="Center" />
+            <Picker Title="Select Hue Bridge" x:Name="AvailableBridges" SelectedIndexChanged="AvailableBridges_SelectedIndexChanged" />
+
+            <Button Text="Register on bridge" Clicked="Register_Click"/>
+        </StackLayout>
+    </ContentPage.Content>
+</ContentPage>

@@ -4,23 +4,26 @@
              x:Class="KronisHue.LightsPage"
         Title="KronisHue">
     <ContentPage.Content>
-        <ListView ItemsSource="{Binding Lights}"
-          IsGroupingEnabled="true">
-            <ListView.GroupHeaderTemplate>
-                <DataTemplate>
-                    <ViewCell>
-                        <Label Text="{Binding Group.Name}" />
-                    </ViewCell>
-                </DataTemplate>
-            </ListView.GroupHeaderTemplate>
+        <StackLayout Orientation="Vertical">
+            <ListView ItemsSource="{Binding Lights}" x:Name="LightsListView"
+              IsGroupingEnabled="true" BackgroundColor="Red" HasUnevenRows="true">
+                <ListView.GroupHeaderTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Label Text="{Binding Group.Name}" />
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.GroupHeaderTemplate>
 
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <ViewCell>
-                        <Label Text="{Binding Name}" />
-                    </ViewCell>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <Label Text="{Binding Name}" />
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Label x:Name="ErrorLabel"  HorizontalOptions="Fill" BackgroundColor="Green"/>
+        </StackLayout>
     </ContentPage.Content>
 </ContentPage>

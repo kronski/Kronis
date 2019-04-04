@@ -64,8 +64,6 @@ namespace KronisHue
             Bridges = new HashSet<string>();
         }
 
-
-
         #region Api Classes
 
         public class LightState
@@ -214,7 +212,7 @@ namespace KronisHue
         public class Group
         {
             [JsonProperty(PropertyName = "name")]
-            public LightState State { get; set; }
+            public string Name { get; set; }
 
             [JsonProperty(PropertyName = "lights")]
             public int[] LightIndices { get; set; }
@@ -232,6 +230,9 @@ namespace KronisHue
 
         public async Task<string> NewDeveloperAsync()
         {
+            if (IP == null)
+                throw new Exception("Bridge not set");
+
             string uri = $"http://{IP}/api";
 
             using (var httpClient = new HttpClient())
@@ -250,6 +251,9 @@ namespace KronisHue
         {
             if (Username == null)
                 throw new Exception("Username not set");
+
+            if (IP == null)
+                throw new Exception("Bridge not set");
 
             string uri = $"http://{IP}/api/{Username}/lights";
 
@@ -273,6 +277,8 @@ namespace KronisHue
 
         public async Task<Group[]> GetGroupsAsync()
         {
+            if (IP == null)
+                throw new Exception("Bridge not set");
             if (Username == null)
                 throw new Exception("Username not set");
 
@@ -308,7 +314,7 @@ namespace KronisHue
 
             foreach (Group g in groups)
             {
-                g.Lights = g.LightIndices.Select(i => lights[i]).ToArray();
+                g.Lights = g.LightIndices.Select(i => lights[i-1]).ToArray();
                 foreach (Light l in g.Lights)
                 {
                     l.Group = g;

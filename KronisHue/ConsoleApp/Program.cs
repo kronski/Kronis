@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ConsoleApp1
+namespace ConsoleApp
 {
     class Program
     {

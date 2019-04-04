@@ -8,6 +8,7 @@
             <Picker Title="Select Hue Bridge" x:Name="AvailableBridges" SelectedIndexChanged="AvailableBridges_SelectedIndexChanged" />
 
             <Button Text="Register on bridge" Clicked="Register_Click"/>
+            <Label x:Name="RegisterLabel"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

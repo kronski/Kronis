@@ -14,8 +14,11 @@ namespace KronisHue
         {
             InitializeComponent();
             MainPage = new Main();
-            
         }
+
+        public static App Curr => (App)Current;
+
+        public event EventHandler<string> OnBridgeFound = delegate { };
 
         protected override void OnStart()
         {
@@ -67,7 +70,10 @@ namespace KronisHue
                 BridgeApiClient.Current.Bridges.Add(bridge);
 
                 if(BridgeApiClient.Current.IP ==null)
+                {
                     BridgeApiClient.Current.IP = bridge;
+                    OnBridgeFound(this,bridge);
+                }
             }
         }
 

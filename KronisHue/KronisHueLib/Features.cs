@@ -69,19 +69,19 @@ namespace KronisHue
         public class LightState
         {
             [JsonProperty(PropertyName = "on")] //: false,
-            public bool On { get; set; }
+            public bool? On { get; set; }
             [JsonProperty(PropertyName = "bri")] //: 1,
-            public byte Bri { get; set; }
+            public byte? Bri { get; set; }
             [JsonProperty(PropertyName = "hue")] //: 33761,
-            public ushort Hue { get; set; }
+            public ushort? Hue { get; set; }
             [JsonProperty(PropertyName = "sat")] //: 254,
-            public byte Sat { get; set; }
+            public byte? Sat { get; set; }
             [JsonProperty(PropertyName = "effect")] //: "none",
             public string Effect  { get; set; }
             [JsonProperty(PropertyName = "xy")] //: [
             public float[] XY { get; set; }
             [JsonProperty(PropertyName = "ct")] //: 159,
-            public ushort CT { get; set; }
+            public ushort? CT { get; set; }
             [JsonProperty(PropertyName = "alert")] //: "none",
             public string Alert { get; set; }
             [JsonProperty(PropertyName = "colormode")] //: "xy",
@@ -89,9 +89,18 @@ namespace KronisHue
             [JsonProperty(PropertyName = "mode")] //: "homeautomation",
             public string Mode { get; set; }
             [JsonProperty(PropertyName = "reachable")] //: true
-            public bool Reachable { get; set; }
+            public bool? Reachable { get; set; }
 
         }
+
+        public class StateResponse : Dictionary<string, StateResponseItem>
+        {
+        }
+        public class StateResponseItem: Dictionary<string, object>
+        {
+        }
+
+
 
         public class SWUpdate
         {
@@ -156,9 +165,10 @@ namespace KronisHue
         }
         public class Light
         {
+            public string Id { get; set; }
+
             [JsonProperty(PropertyName = "state")]
             public LightState State { get; set; }
-
             
             [JsonProperty(PropertyName = "swupdate")]
             public SWUpdate SWUpdate { get; set; }
@@ -182,8 +192,6 @@ namespace KronisHue
             public string Uniqueid { get; set; }
             [JsonProperty(PropertyName = "swversion")]//: "5.105.0.21169"
             public string SWVersion { get; set; }
-
-            public Group Group { get; set; }
         }
 
         public class GroupAction
@@ -221,9 +229,13 @@ namespace KronisHue
             public string Type { get; set; }
             [JsonProperty(PropertyName = "action")]
             public GroupAction Action { get; set; }
+        }
 
-
-            public Light[] Lights { get; set; }
+        public class GroupLightList : List<Light>
+        {
+            public Group Group { get; set; }
+            public string GroupName { get { return Group?.Name; } }
+            public List<Light> Lights => this;
         }
 
         #endregion
@@ -249,11 +261,7 @@ namespace KronisHue
 
         public async Task<Light[]> GetLightsAsync()
         {
-            if (Username == null)
-                throw new Exception("Username not set");
-
-            if (IP == null)
-                throw new Exception("Bridge not set");
+            CheckBridge();
 
             string uri = $"http://{IP}/api/{Username}/lights";
 
@@ -266,9 +274,10 @@ namespace KronisHue
                     throw new Exception("Invalid response");
 
                 List<Light> list = new List<Light>();
-                foreach (var light in obj.Properties())
+                foreach (var item in obj.ToObject<Dictionary<string,Light>>())
                 {
-                    list.Add(light.Value.ToObject<Light>());
+                    item.Value.Id = item.Key;
+                    list.Add(item.Value);
                 }
 
                 return list.ToArray();
@@ -277,10 +286,7 @@ namespace KronisHue
 
         public async Task<Group[]> GetGroupsAsync()
         {
-            if (IP == null)
-                throw new Exception("Bridge not set");
-            if (Username == null)
-                throw new Exception("Username not set");
+            CheckBridge();
 
             string uri = $"http://{IP}/api/{Username}/groups";
 
@@ -302,7 +308,7 @@ namespace KronisHue
             }
         }
 
-        public async Task<Light[]> GetLightsWithGroupAsync()
+        public async Task<List<GroupLightList>> GetGroupLightListAsync()
         {
             Task<Light[]> lightTask = GetLightsAsync();
             Task<Group[]> groupsTask = GetGroupsAsync();
@@ -312,16 +318,54 @@ namespace KronisHue
             var lights = lightTask.Result;
             var groups = groupsTask.Result;
 
+            List<GroupLightList> result = new List<GroupLightList>();
+
             foreach (Group g in groups)
             {
-                g.Lights = g.LightIndices.Select(i => lights[i-1]).ToArray();
-                foreach (Light l in g.Lights)
+                var gll = new GroupLightList
                 {
-                    l.Group = g;
-                }
+                    Group = g
+                };
+                gll.AddRange(g.LightIndices.Select(i => lights[i - 1]));
+                result.Add(gll);
             }
 
-            return lights;
+            return result;
+        }
+
+        public async Task<StateResponse[]> SetLightStateAsync(string LightId, LightState state)
+        {
+            CheckBridge();
+
+            string uri = $"http://{IP}/api/{Username}/lights/{LightId}/state";
+
+            using (var httpClient = new HttpClient())
+            {
+                var postdata = JsonConvert.SerializeObject(state,Formatting.None, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                var content = new StringContent(postdata);
+
+                var response = await httpClient.PutAsync(uri, content);
+
+                string json = await response.Content.ReadAsStringAsync();
+                if (!(JToken.Parse(json) is JArray arr))
+                    throw new Exception("Invalid response");
+
+                List<StateResponse> list = new List<StateResponse>();
+                foreach (var o in arr)
+                {
+                    list.Add(o.ToObject<StateResponse>());
+                }
+
+                return list.ToArray();
+            }
+        }
+
+        private void CheckBridge()
+        {
+            if (IP == null)
+                throw new Exception("Bridge not set");
+            if (Username == null)
+                throw new Exception("Username not set");
         }
     }
 }

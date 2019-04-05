@@ -4,7 +4,7 @@
              x:Class="KronisHue.MainMaster"
              Title="Master">
   <StackLayout>
-    <ListView x:Name="MenuItemsListView"
+        <ListView x:Name="MenuItemsListView" x:FieldModifier="public"
               SeparatorVisibility="None"
               HasUnevenRows="true"
               ItemsSource="{Binding MenuItems}">

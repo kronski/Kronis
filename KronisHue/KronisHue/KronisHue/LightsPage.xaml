@@ -5,12 +5,20 @@
         Title="KronisHue">
     <ContentPage.Content>
         <StackLayout Orientation="Vertical">
-            <ListView ItemsSource="{Binding Lights}" x:Name="LightsListView"
-              IsGroupingEnabled="true" BackgroundColor="Red" HasUnevenRows="true">
+            <ListView ItemsSource="{Binding GroupLights}" x:Name="LightsListView"
+              IsGroupingEnabled="true" HasUnevenRows="true">
                 <ListView.GroupHeaderTemplate>
                     <DataTemplate>
                         <ViewCell>
-                            <Label Text="{Binding Group.Name}" />
+                            <Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="*"/>
+									<ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                
+                                <Label Text="{Binding GroupName}" Margin="20,0" FontSize="28" FontAttributes="Bold" />
+                                <Switch Grid.Column="1" IsToggled="{Binding Path=Group.Action.On}" Margin="0,0,20,0" BindingContextChanged="GroupSwitch_BindingContextChanged"/>
+                            </Grid>
                         </ViewCell>
                     </DataTemplate>
                 </ListView.GroupHeaderTemplate>
@@ -18,7 +26,16 @@
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>
-                            <Label Text="{Binding Name}" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Label Text="{Binding Name}" Margin="40,0" FontSize="24" />
+                                <Switch Grid.Column="1" IsToggled="{Binding Path=State.On}" Margin="0,0,20,0" BindingContextChanged="LightSwitch_BindingContextChanged"/>
+                            </Grid>
+
                         </ViewCell>
                     </DataTemplate>
                 </ListView.ItemTemplate>

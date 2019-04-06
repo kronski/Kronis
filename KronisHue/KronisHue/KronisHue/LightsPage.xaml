@@ -17,7 +17,7 @@
                                 </Grid.ColumnDefinitions>
                                 
                                 <Label Text="{Binding GroupName}" Margin="20,0" FontSize="28" FontAttributes="Bold" />
-                                <Switch Grid.Column="1" IsToggled="{Binding Path=Group.Action.On}" Margin="0,0,20,0" BindingContextChanged="GroupSwitch_BindingContextChanged"/>
+                                <Switch Grid.Column="1" IsToggled="{Binding Path=Group.Action.On, Mode=OneWay}" Margin="0,0,20,0" Toggled="GroupSwitch_Toggled"/>
                             </Grid>
                         </ViewCell>
                     </DataTemplate>
@@ -33,7 +33,7 @@
                                 </Grid.ColumnDefinitions>
 
                                 <Label Text="{Binding Name}" Margin="40,0" FontSize="24" />
-                                <Switch Grid.Column="1" IsToggled="{Binding Path=State.On}" Margin="0,0,20,0" BindingContextChanged="LightSwitch_BindingContextChanged"/>
+                                <Switch Grid.Column="1" IsToggled="{Binding Path=State.On, Mode=OneWay}" Margin="0,0,20,0" Toggled="LightSwitch_Toggled"/>
                             </Grid>
 
                         </ViewCell>

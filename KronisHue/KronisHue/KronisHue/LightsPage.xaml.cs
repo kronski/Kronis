@@ -45,7 +45,7 @@ namespace KronisHue
             try
             {
                 var gll = await BridgeApiClient.Current.GetGroupLightListAsync();
-                LightsBindingContext.GroupLights = new ObservableCollection<BridgeApiClient.GroupLightList>(gll);
+                LightsBindingContext.GroupLights = new ObservableCollection<GroupLightList>(gll);
 
             }
             catch (Exception ex)
@@ -59,8 +59,8 @@ namespace KronisHue
             private bool updating;
             public bool Updating => updating;
 
-            private ObservableCollection<BridgeApiClient.Light> lights;
-            public ObservableCollection<BridgeApiClient.Light> Lights
+            private ObservableCollection<Light> lights;
+            public ObservableCollection<Light> Lights
             {
                 get
                 {
@@ -73,8 +73,8 @@ namespace KronisHue
                 }
             }
 
-            private ObservableCollection<BridgeApiClient.Group> groups;
-            public ObservableCollection<BridgeApiClient.Group> Groups
+            private ObservableCollection<Group> groups;
+            public ObservableCollection<Group> Groups
             {
                 get
                 {
@@ -87,8 +87,8 @@ namespace KronisHue
                 }
             }
 
-            private ObservableCollection<BridgeApiClient.GroupLightList> grouplights;
-            public ObservableCollection<BridgeApiClient.GroupLightList> GroupLights
+            private ObservableCollection<GroupLightList> grouplights;
+            public ObservableCollection<GroupLightList> GroupLights
             {
                 get
                 {
@@ -104,9 +104,9 @@ namespace KronisHue
 
             public LightsViewModel()
             {
-                Lights = new ObservableCollection<BridgeApiClient.Light>();
-                Groups = new ObservableCollection<BridgeApiClient.Group>();
-                GroupLights = new ObservableCollection<BridgeApiClient.GroupLightList>();
+                Lights = new ObservableCollection<Light>();
+                Groups = new ObservableCollection<Group>();
+                GroupLights = new ObservableCollection<GroupLightList>();
             }
 
             #region INotifyPropertyChanged Implementation
@@ -121,40 +121,32 @@ namespace KronisHue
             #endregion
         }
 
-        private void GroupSwitch_Toggled(object sender, ToggledEventArgs e)
+        private async void GroupSwitch_Toggled(object sender, ToggledEventArgs e)
         {
-
-        }
-
-        private async void LightSwitch_Toggled(object sender, ToggledEventArgs e)
-        {
-            if (LightsBindingContext.Updating)
+            GroupLightList gll = (GroupLightList)((Switch)sender).BindingContext;
+            if (gll.Group.Action.On == e.Value)
                 return;
 
-            BridgeApiClient.Light l = (BridgeApiClient.Light)((Switch)sender).BindingContext;
-
-            BridgeApiClient.LightState ls = new BridgeApiClient.LightState
+            GroupAction ga = new GroupAction
             {
                 On = e.Value
             };
 
-            await BridgeApiClient.Current.SetLightStateAsync(l.Id, ls);
+            await BridgeApiClient.Current.SetGroupActionAsync(gll.Group, ga);
         }
 
-        private void GroupSwitch_BindingContextChanged(object sender, EventArgs e)
+        private async void LightSwitch_Toggled(object sender, ToggledEventArgs e)
         {
-            // we are not invoking Switch_Toggled directly from XAML for a reason!
-            // that is in order to not fire it when Binding.
-            if (!(sender is Switch s)) return;
-                s.Toggled += GroupSwitch_Toggled;
-        }
+            Light l = (Light)((Switch)sender).BindingContext;
+            if (l.State.On == e.Value)
+                return;
 
-        private void LightSwitch_BindingContextChanged(object sender, EventArgs e)
-        {
-            // we are not invoking Switch_Toggled directly from XAML for a reason!
-            // that is in order to not fire it when Binding.
-            if (!(sender is Switch s)) return;
-                s.Toggled += LightSwitch_Toggled;
+            LightState ls = new LightState
+            {
+                On = e.Value
+            };
+
+            await BridgeApiClient.Current.SetLightStateAsync(l, ls);
         }
     }
 }

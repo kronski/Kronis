@@ -193,7 +193,7 @@ namespace KronisHue
         [JsonProperty(PropertyName = "config")]//: {
         public LightConfig Config { get; set; }
 
-        [JsonProperty(PropertyName = "uniqueid")]//: "00:17:88:01:00:bd:c7:b9-0b",
+        [JsonProperty(PropertyName = "uniqueid")]
         public string Uniqueid { get; set; }
         [JsonProperty(PropertyName = "swversion")]//: "5.105.0.21169"
         public string SWVersion { get; set; }

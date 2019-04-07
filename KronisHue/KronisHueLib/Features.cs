@@ -9,6 +9,10 @@ using System.Threading;
 using System.Net;
 using System.Reflection;
 using Newtonsoft.Json.Serialization;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.IO;
+using System.Diagnostics;
 
 namespace KronisHue
 {
@@ -49,10 +53,25 @@ namespace KronisHue
 
     #region Api Classes
 
-    public class LightState
+    public class LightState : INotifyPropertyChanged
     {
+        private bool? on;
+
         [JsonProperty(PropertyName = "on")] //: false,
-        public bool? On { get; set; }
+        public bool? On {
+            get
+            {
+                return on;
+            }
+            set
+            {
+                if (value != on)
+                {
+                    on = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
         [JsonProperty(PropertyName = "bri")] //: 1,
         public byte? Bri { get; set; }
         [JsonProperty(PropertyName = "hue")] //: 33761,
@@ -74,6 +93,17 @@ namespace KronisHue
         [JsonProperty(PropertyName = "reachable")] //: true
         public bool? Reachable { get; set; }
 
+
+        #region INotifyPropertyChanged Implementation
+        public event PropertyChangedEventHandler PropertyChanged;
+        void OnPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            if (PropertyChanged == null)
+                return;
+
+            PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
     }
 
 
@@ -124,7 +154,6 @@ namespace KronisHue
         [JsonProperty(PropertyName = "control")] //: {
         public LightCapabilitiesControl Control { get; set; }
 
-
         [JsonProperty(PropertyName = "streaming")] //: {
         public LightCapabilitiesControlStreaming Streaming { get; set; }
 
@@ -168,12 +197,16 @@ namespace KronisHue
         public string Uniqueid { get; set; }
         [JsonProperty(PropertyName = "swversion")]//: "5.105.0.21169"
         public string SWVersion { get; set; }
+
+        public List<Group> Groups { get; set; }
     }
 
-    public class GroupAction
+    public class GroupAction : INotifyPropertyChanged
     {
+        private bool? on;
+
         [JsonProperty(PropertyName = "on")] //: false,
-        public bool? On { get; set; }
+        public bool? On { get => on; set { if (value != on) { on = value; OnPropertyChanged(); } } }
         [JsonProperty(PropertyName = "bri")] //: 1,
         public byte? Bri { get; set; }
         [JsonProperty(PropertyName = "hue")] //: 33761,
@@ -203,6 +236,17 @@ namespace KronisHue
         [JsonProperty(PropertyName = "scene")]
         public string Scene { get; set; }
 
+        #region INotifyPropertyChanged Implementation
+        public event PropertyChangedEventHandler PropertyChanged;
+        void OnPropertyChanged([CallerMemberName] string propertyName = "")
+        {
+            if (PropertyChanged == null)
+                return;
+
+            PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
+
     }
 
 
@@ -220,13 +264,14 @@ namespace KronisHue
         public string Type { get; set; }
         [JsonProperty(PropertyName = "action")]
         public GroupAction Action { get; set; }
+
+        public List<Light> Lights { get; set; }
     }
 
     public class GroupLightList : List<Light>
     {
         public Group Group { get; set; }
         public string GroupName { get { return Group?.Name; } }
-        public List<Light> Lights => this;
     }
 
     #endregion
@@ -264,26 +309,35 @@ namespace KronisHue
                 var postdata = JsonConvert.SerializeObject(new { devicetype = "KronisHue#Kronis" });
                 var content = new StringContent(postdata);
                 var response = await httpClient.PostAsync(uri, content);
-
-                string json = await response.Content.ReadAsStringAsync();
-                JArray arr = JArray.Parse(json);
+                string json = await JsonFromResponse(response);
+                var arr = ParseJsonArray(json);
                 return (string)arr?[0]?["success"]?["username"];
             }
         }
 
+        private static async Task<string> JsonFromResponse(HttpResponseMessage response)
+        {
+            response.EnsureSuccessStatusCode();
+
+            //return await response.Content.ReadAsStringAsync();
+            var stream = await response.Content.ReadAsStreamAsync();
+            var sr = new StreamReader(stream);
+            return await sr.ReadToEndAsync();
+
+        }
+
         public async Task<Light[]> GetLightsAsync()
         {
-            CheckBridge();
+            if (!CheckBridge())
+                return new Light[0];
 
             string uri = $"http://{IP}/api/{Username}/lights";
 
             using (var httpClient = new HttpClient())
             {
                 var response = await httpClient.GetAsync(uri);
-
-                string json = await response.Content.ReadAsStringAsync();
-                if (!(JToken.Parse(json) is JObject obj))
-                    throw new Exception("Invalid response");
+                string json = await JsonFromResponse(response);
+                var obj = ParseJsonObject(json);
 
                 List<Light> list = new List<Light>();
                 foreach (var prop in obj.Properties())
@@ -297,19 +351,46 @@ namespace KronisHue
             }
         }
 
+        private static JToken ParseJsonToken(string json)
+        {
+            try
+            {
+                var token = JToken.Parse(json);
+                return token;
+            }
+            catch 
+            {
+                Debug.WriteLine(json);
+                throw;
+            }
+        }
+
+        private static JArray ParseJsonArray(string json)
+        {
+            if (!(ParseJsonToken(json) is JArray arr))
+                throw new Exception("Invalid response");
+            return arr;
+        }
+
+        private static JObject ParseJsonObject(string json)
+        {
+            if (!(ParseJsonToken(json) is JObject obj))
+                throw new Exception("Invalid response");
+            return obj;
+        }
+
         public async Task<Group[]> GetGroupsAsync()
         {
-            CheckBridge();
+            if (!CheckBridge())
+                return new Group[0];
 
             string uri = $"http://{IP}/api/{Username}/groups";
 
             using (var httpClient = new HttpClient())
             {
                 var response = await httpClient.GetAsync(uri);
-
-                string json = await response.Content.ReadAsStringAsync();
-                if (!(JToken.Parse(json) is JObject obj))
-                    throw new Exception("Invalid response");
+                string json = await JsonFromResponse(response);
+                var obj = ParseJsonObject(json);
 
                 List<Group> list = new List<Group>();
                 foreach (var prop in obj.Properties())
@@ -325,15 +406,16 @@ namespace KronisHue
 
         public async Task<List<GroupLightList>> GetGroupLightListAsync()
         {
-            Task<Light[]> lightTask = GetLightsAsync();
+            /*Task<Light[]> lightTask = GetLightsAsync();
             Task<Group[]> groupsTask = GetGroupsAsync();
             await Task.WhenAll(lightTask, groupsTask);
-            
-
             var lights = lightTask.Result;
-            var groups = groupsTask.Result;
+            var groups = groupsTask.Result;*/
 
-            List<GroupLightList> result = new List<GroupLightList>();
+            var lights = await GetLightsAsync();
+            var groups = await GetGroupsAsync();
+
+            List <GroupLightList> result = new List<GroupLightList>();
 
             foreach (Group g in groups)
             {
@@ -342,6 +424,16 @@ namespace KronisHue
                     Group = g
                 };
                 gll.AddRange(g.LightIndices.Select(i => lights[i - 1]));
+
+                foreach (var light in gll)
+                {
+                    if (light.Groups == null)
+                        light.Groups = new List<Group>();
+                    light.Groups.Add(g);
+                }
+
+                g.Lights = gll;
+
                 result.Add(gll);
             }
 
@@ -350,7 +442,7 @@ namespace KronisHue
 
         public async Task SetLightStateAsync(Light light, LightState state)
         {
-            CheckBridge();
+            CheckBridgeAndThrow();
 
             string uri = $"http://{IP}/api/{Username}/lights/{light.Id}/state";
             string lightprefix = $"/lights/{light.Id}/state/";
@@ -361,10 +453,8 @@ namespace KronisHue
                 var content = new StringContent(postdata);
 
                 var response = await httpClient.PutAsync(uri, content);
-
-                string json = await response.Content.ReadAsStringAsync();
-                if (!(JToken.Parse(json) is JArray arr))
-                    throw new Exception("Invalid response");
+                string json = await JsonFromResponse(response);
+                var arr = ParseJsonArray(json);
 
                 foreach (var item in arr)
                 {
@@ -392,11 +482,37 @@ namespace KronisHue
                     }
                 }
             }
+            UpdateGroups(light);
+        }
+
+        public void UpdateGroups(Light light)
+        {
+            if (light.Groups == null)
+                throw new ArgumentException("Light missing groups");
+
+            foreach (Group group in light.Groups)
+            {
+                bool allon = group.Lights.All(l => l.State.On == true);
+                bool alloff = group.Lights.All(l => l.State.On == false);
+
+                if (allon)
+                    group.Action.On = true;
+                if (alloff)
+                    group.Action.On = false;
+            }
+        }
+
+        public void UpdateLights(Group group)
+        {
+            foreach (Light light in group.Lights)
+            {
+                light.State.On = group.Action.On;
+            }
         }
 
         public async Task SetGroupActionAsync(Group group, GroupAction state)
         {
-            CheckBridge();
+            CheckBridgeAndThrow();
 
             string uri = $"http://{IP}/api/{Username}/groups/{group.Id}/action";
             string prefix = $"/groups/{group.Id}/action/";
@@ -407,10 +523,8 @@ namespace KronisHue
                 var content = new StringContent(postdata);
 
                 var response = await httpClient.PutAsync(uri, content);
-
-                string json = await response.Content.ReadAsStringAsync();
-                if (!(JToken.Parse(json) is JArray arr))
-                    throw new Exception("Invalid response");
+                string json = await JsonFromResponse(response);
+                var arr = ParseJsonArray(json);
 
                 foreach (var item in arr)
                 {
@@ -438,14 +552,24 @@ namespace KronisHue
                     }
                 }
             }
+            UpdateLights(group);
         }
 
-        private void CheckBridge()
+        private void CheckBridgeAndThrow()
         {
             if (IP == null)
                 throw new Exception("Bridge not set");
             if (Username == null)
                 throw new Exception("Username not set");
+        }
+
+        private bool CheckBridge()
+        {
+            if (IP == null)
+                return false;
+            if (Username == null)
+                return false;
+            return true;
         }
     }
 }

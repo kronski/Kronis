@@ -35,58 +35,19 @@ namespace KronisHue
         {
             base.OnAppearing();
 
-            if (BridgeApiClient.Current.IP != null)
+            if (BridgeApiClient.Current?.IP != null)
                 await PopulateLightsAsync();
 
         }
 
         private async Task PopulateLightsAsync()
         {
-            try
-            {
-                var gll = await BridgeApiClient.Current.GetGroupLightListAsync();
-                LightsBindingContext.GroupLights = new ObservableCollection<GroupLightList>(gll);
-
-            }
-            catch (Exception ex)
-            {
-                ErrorLabel.Text = ex.Message;
-            }
+            var gll = await BridgeApiClient.Current.GetGroupLightListAsync();
+            LightsBindingContext.GroupLights = new ObservableCollection<GroupLightList>(gll);
         }
 
         class LightsViewModel : INotifyPropertyChanged
         {
-            private bool updating;
-            public bool Updating => updating;
-
-            private ObservableCollection<Light> lights;
-            public ObservableCollection<Light> Lights
-            {
-                get
-                {
-                    return lights;
-                }
-                set
-                {
-                    lights = value;
-                    OnPropertyChanged();
-                }
-            }
-
-            private ObservableCollection<Group> groups;
-            public ObservableCollection<Group> Groups
-            {
-                get
-                {
-                    return groups;
-                }
-                set
-                {
-                    groups = value;
-                    OnPropertyChanged();
-                }
-            }
-
             private ObservableCollection<GroupLightList> grouplights;
             public ObservableCollection<GroupLightList> GroupLights
             {
@@ -104,8 +65,6 @@ namespace KronisHue
 
             public LightsViewModel()
             {
-                Lights = new ObservableCollection<Light>();
-                Groups = new ObservableCollection<Group>();
                 GroupLights = new ObservableCollection<GroupLightList>();
             }
 
@@ -124,7 +83,8 @@ namespace KronisHue
         private async void GroupSwitch_Toggled(object sender, ToggledEventArgs e)
         {
             GroupLightList gll = (GroupLightList)((Switch)sender).BindingContext;
-            if (gll.Group.Action.On == e.Value)
+
+            if (gll == null || gll.Group.Action.On == e.Value)
                 return;
 
             GroupAction ga = new GroupAction
@@ -138,7 +98,7 @@ namespace KronisHue
         private async void LightSwitch_Toggled(object sender, ToggledEventArgs e)
         {
             Light l = (Light)((Switch)sender).BindingContext;
-            if (l.State.On == e.Value)
+            if (l==null || l.State.On == e.Value)
                 return;
 
             LightState ls = new LightState
@@ -147,6 +107,20 @@ namespace KronisHue
             };
 
             await BridgeApiClient.Current.SetLightStateAsync(l, ls);
+        }
+
+        private async void DetailsButton_Clicked(object sender, EventArgs e)
+        {
+            if(LightsListView.SelectedItem is Light light)
+            {
+                var detailpage = new LightDetailPage(light);
+                var navpage = new NavigationPage(detailpage)
+                {
+                    Title = light.Name
+                };
+
+                await Navigation.PushAsync(navpage);
+            }
         }
     }
 }

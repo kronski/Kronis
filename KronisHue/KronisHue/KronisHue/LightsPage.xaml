@@ -5,18 +5,18 @@
         Title="KronisHue">
     <ContentPage.Content>
         <StackLayout Orientation="Vertical">
-            <ListView ItemsSource="{Binding GroupLights}" x:Name="LightsListView"
-              IsGroupingEnabled="true" HasUnevenRows="true">
+            <ListView ItemsSource="{Binding GroupLights}" x:Name="LightsListView" IsVisible="True"
+                IsGroupingEnabled="true" HasUnevenRows="true">
                 <ListView.GroupHeaderTemplate>
                     <DataTemplate>
                         <ViewCell>
-                            <Grid>
+                            <Grid BackgroundColor="LightGray">
 								<Grid.ColumnDefinitions>
 									<ColumnDefinition Width="*"/>
 									<ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 
-                                <Label Text="{Binding GroupName}" Margin="20,0" FontSize="28" FontAttributes="Bold" />
+                                <Label Text="{Binding GroupName}" Margin="20,0" FontSize="28" FontAttributes="Bold"/>
                                 <Switch Grid.Column="1" IsToggled="{Binding Path=Group.Action.On, Mode=OneWay}" Margin="0,0,20,0" Toggled="GroupSwitch_Toggled"/>
                             </Grid>
                         </ViewCell>
@@ -40,7 +40,7 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <Label x:Name="ErrorLabel"  HorizontalOptions="Fill" BackgroundColor="Green"/>
+            <Button Text="Details" x:Name="DetailsButton" Clicked="DetailsButton_Clicked"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

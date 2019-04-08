@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -36,7 +38,7 @@ namespace KronisHue
             public object Value { get; set; }
         }
 
-        class DetailsViewModel : INotifyPropertyChanged
+        class DetailsViewModel : NotifyChangeBase
         {
 
             private ObservableCollection<LightDetailProperty> properties;
@@ -56,43 +58,59 @@ namespace KronisHue
             {
                 ObservableCollection<LightDetailProperty>  p = new ObservableCollection<LightDetailProperty>();
 
-                PropertyInfo[] pia = typeof(Light).GetProperties();
-                foreach (PropertyInfo pi in pia)
-                {
-                    var obj = pi.GetValue(light);
+                Newtonsoft.Json.JsonSerializer ser = new Newtonsoft.Json.JsonSerializer();
 
-                    p.Add(new LightDetailProperty()
+                void BuildProperties(object baseobj, string basename)
+                {
+                    PropertyInfo[] pia = baseobj.GetType().GetProperties();
+                    foreach (PropertyInfo pi in pia)
                     {
-                        Property = pi.Name,
-                        Value = obj
-                    });
+                        if (!pi.PropertyType.IsPublic)
+                            continue;
+                        Debug.WriteLine(basename + pi.Name);
+                        var obj = pi.GetValue(baseobj);
+                        if (obj == null)
+                        {
+                            p.Add(new LightDetailProperty()
+                            {
+                                Property = basename + pi.Name,
+                                Value = null
+                            });
+                        }
+                        else if (pi.PropertyType == typeof(Light))
+                        {
+                        }
+                        else if (pi.PropertyType.IsArray || pi.PropertyType.Name == "List`1")
+                        {
+                            string json = JsonConvert.SerializeObject(obj);
+
+                            p.Add(new LightDetailProperty()
+                            {
+                                Property = basename + pi.Name,
+                                Value = json
+                            });
+                        }
+                        else if (pi.PropertyType.IsClass && pi.PropertyType != typeof(string))
+                        {
+                            BuildProperties(obj, basename + pi.Name+".");
+                        }
+                        else
+                        {
+                            p.Add(new LightDetailProperty()
+                            {
+                                Property = basename + pi.Name,
+                                Value = obj?.ToString()
+                            });
+                        }
+                    }
                 }
 
-                pia = typeof(LightState).GetProperties();
-                foreach (PropertyInfo pi in pia)
-                {
-                    var obj = pi.GetValue(light.State);
+                BuildProperties(light,"");
 
-                    p.Add(new LightDetailProperty()
-                    {
-                        Property = pi.Name,
-                        Value = obj
-                    });
-                }
+                
 
                 Properties = p;
             }
-
-            #region INotifyPropertyChanged Implementation
-            public event PropertyChangedEventHandler PropertyChanged;
-            void OnPropertyChanged([CallerMemberName] string propertyName = "")
-            {
-                if (PropertyChanged == null)
-                    return;
-
-                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
-            }
-            #endregion
         }
 
     }

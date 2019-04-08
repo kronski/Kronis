@@ -53,225 +53,271 @@ namespace KronisHue
 
     #region Api Classes
 
-    public class LightState : INotifyPropertyChanged
+    public class NotifyChangeBase : INotifyPropertyChanged
     {
-        private bool? on;
-
-        [JsonProperty(PropertyName = "on")] //: false,
-        public bool? On {
-            get
-            {
-                return on;
-            }
-            set
-            {
-                if (value != on)
-                {
-                    on = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-        [JsonProperty(PropertyName = "bri")] //: 1,
-        public byte? Bri { get; set; }
-        [JsonProperty(PropertyName = "hue")] //: 33761,
-        public ushort? Hue { get; set; }
-        [JsonProperty(PropertyName = "sat")] //: 254,
-        public byte? Sat { get; set; }
-        [JsonProperty(PropertyName = "effect")] //: "none",
-        public string Effect { get; set; }
-        [JsonProperty(PropertyName = "xy")] //: [
-        public float[] XY { get; set; }
-        [JsonProperty(PropertyName = "ct")] //: 159,
-        public ushort? CT { get; set; }
-        [JsonProperty(PropertyName = "alert")] //: "none",
-        public string Alert { get; set; }
-        [JsonProperty(PropertyName = "colormode")] //: "xy",
-        public string ColorMode { get; set; }
-        [JsonProperty(PropertyName = "mode")] //: "homeautomation",
-        public string Mode { get; set; }
-        [JsonProperty(PropertyName = "reachable")] //: true
-        public bool? Reachable { get; set; }
-
-
-        #region INotifyPropertyChanged Implementation
         public event PropertyChangedEventHandler PropertyChanged;
-        void OnPropertyChanged([CallerMemberName] string propertyName = "")
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = "")
         {
             if (PropertyChanged == null)
                 return;
 
             PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-        #endregion
     }
 
-
-
-    public class SWUpdate
-    {
-        [JsonProperty(PropertyName = "state")] //: "noupdates",
-        public string State { get; set; }
-        [JsonProperty(PropertyName = "lastinstall")] //: "2018-01-02T19:24:20"
-        public DateTime? LastInstall { get; set; }
-    }
-
-    public class LightCapabilitiesControlCt
-    {
-        [JsonProperty(PropertyName = "min")] //: 153,
-        public ushort Min { get; set; }
-        [JsonProperty(PropertyName = "max")] //: 500
-        public ushort Max { get; set; }
-    }
-
-    public class LightCapabilitiesControl
-    {
-        [JsonProperty(PropertyName = "mindimlevel")] //: 5000,
-        public ushort Mindimlevel { get; set; }
-        [JsonProperty(PropertyName = "maxlumen")] //: 600,
-        public ushort Maxlumen { get; set; }
-        [JsonProperty(PropertyName = "colorgamuttype")] //: "B",
-        public string Colorgamuttype { get; set; }
-        [JsonProperty(PropertyName = "colorgamut")] //: [
-        public float[][] Colorgamut { get; set; }
-        [JsonProperty(PropertyName = "ct")] //: {
-        public LightCapabilitiesControlCt Ct { get; set; }
-    }
-
-    public class LightCapabilitiesControlStreaming
-    {
-        [JsonProperty(PropertyName = "renderer")] //: true,
-        public bool Renderer { get; set; }
-        [JsonProperty(PropertyName = "proxy")] //: false
-        public bool Proxy { get; set; }
-    }
-
-
-    public class LightCapabilities
-    {
-        [JsonProperty(PropertyName = "certified")] //: true,
-        public bool Certified { get; set; }
-        [JsonProperty(PropertyName = "control")] //: {
-        public LightCapabilitiesControl Control { get; set; }
-
-        [JsonProperty(PropertyName = "streaming")] //: {
-        public LightCapabilitiesControlStreaming Streaming { get; set; }
-
-    }
-
-    public class LightConfig
-    {
-        [JsonProperty(PropertyName = "archetype")]//: "sultanbulb",
-        public string Archetype { get; set; }
-        [JsonProperty(PropertyName = "function")]//: "mixed",
-        public string Function { get; set; }
-        [JsonProperty(PropertyName = "direction")]//: "omnidirectional"
-        public string Direction { get; set; }
-    }
-    public class Light
-    {
-        public string Id { get; set; }
-
-        [JsonProperty(PropertyName = "state")]
-        public LightState State { get; set; }
-
-        [JsonProperty(PropertyName = "swupdate")]
-        public SWUpdate SWUpdate { get; set; }
-
-        [JsonProperty(PropertyName = "type")] //: "Extended color light",
-        public string Type { get; set; }
-        [JsonProperty(PropertyName = "name")] //: "Hue color lamp 7",
-        public string Name { get; set; }
-        [JsonProperty(PropertyName = "modelid")] //: "LCT007",
-        public string Modelid { get; set; }
-        [JsonProperty(PropertyName = "manufacturername")] //: "Philips",
-        public string Manufacturername { get; set; }
-        [JsonProperty(PropertyName = "productname")] //: "Hue color lamp",
-        public string Productname { get; set; }
-        [JsonProperty(PropertyName = "capabilities")] //: {
-        public LightCapabilities Capabilities { get; set; }
-        [JsonProperty(PropertyName = "config")]//: {
-        public LightConfig Config { get; set; }
-
-        [JsonProperty(PropertyName = "uniqueid")]
-        public string Uniqueid { get; set; }
-        [JsonProperty(PropertyName = "swversion")]//: "5.105.0.21169"
-        public string SWVersion { get; set; }
-
-        public List<Group> Groups { get; set; }
-    }
-
-    public class GroupAction : INotifyPropertyChanged
+    public class LightState : NotifyChangeBase
     {
         private bool? on;
+        private byte? bri;
+        private ushort? hue;
+        private byte? sat;
+        private string effect;
+        private float[] xy;
+        private ushort? ct;
+        private string alert;
+        private string colormode;
+        private string mode;
+        private bool? reachable;
+
 
         [JsonProperty(PropertyName = "on")] //: false,
         public bool? On { get => on; set { if (value != on) { on = value; OnPropertyChanged(); } } }
         [JsonProperty(PropertyName = "bri")] //: 1,
-        public byte? Bri { get; set; }
+        public byte? Bri { get => bri; set { if (value != bri) { bri = value; OnPropertyChanged(); } } }
         [JsonProperty(PropertyName = "hue")] //: 33761,
-        public ushort? Hue { get; set; }
+        public ushort? Hue { get => hue; set { if (value != hue) { hue = value; OnPropertyChanged(); } } }
         [JsonProperty(PropertyName = "sat")] //: 254,
-        public byte? Sat { get; set; }
-        [JsonProperty(PropertyName = "xy")] //: [
-        public float[] XY { get; set; }
-        [JsonProperty(PropertyName = "ct")] //: 159,
-        public ushort? CT { get; set; }
-        [JsonProperty(PropertyName = "alert")] //: "none",
-        public string Alert { get; set; }
+        public byte? Sat { get => sat; set { if (value != sat) { sat = value; OnPropertyChanged(); } } }
         [JsonProperty(PropertyName = "effect")] //: "none",
-        public string Effect { get; set; }
-        [JsonProperty(PropertyName = "transitiontime")]
-        public ushort? Transitiontime { get; set; }
-        [JsonProperty(PropertyName = "bri_inc")]
-        public short? BriInc { get; set; }
-        [JsonProperty(PropertyName = "sat_inc")]
-        public short? SatInc { get; set; }
-        [JsonProperty(PropertyName = "hue_inc")]
-        public int? HueInc { get; set; }
-        [JsonProperty(PropertyName = "ct_inc")]
-        public int? CtInc { get; set; }
-        [JsonProperty(PropertyName = "xy_inc")]
-        public float? XyInc { get; set; }
-        [JsonProperty(PropertyName = "scene")]
-        public string Scene { get; set; }
-
-        #region INotifyPropertyChanged Implementation
-        public event PropertyChangedEventHandler PropertyChanged;
-        void OnPropertyChanged([CallerMemberName] string propertyName = "")
-        {
-            if (PropertyChanged == null)
-                return;
-
-            PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-        #endregion
-
+        public string Effect { get => effect; set { if (value != effect) { effect = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "xy")] //: [
+        public float[] XY { get => xy; set { if (value != xy) { xy = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "ct")] //: 159,
+        public ushort? CT { get => ct; set { if (value != ct) { ct = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "alert")] //: "none",
+        public string Alert { get => alert; set { if (value != alert) { alert = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "colormode")] //: "xy",
+        public string ColorMode { get => colormode; set { if (value != colormode) { colormode = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "mode")] //: "homeautomation",
+        public string Mode { get => mode; set { if (value != mode) { mode = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "reachable")] //: true
+        public bool? Reachable { get => reachable; set { if (value != reachable) { reachable = value; OnPropertyChanged(); } } }
     }
 
 
-    public class Group
+
+    public class SWUpdate : NotifyChangeBase
     {
-        public string Id { get; set; }
+        private string state;
+        private DateTime? lastinstall;
+
+           [JsonProperty(PropertyName = "state")] //: "noupdates",
+        public string State { get => state; set { if (value != state) { state = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "lastinstall")] //: "2018-01-02T19:24:20"
+        public DateTime? LastInstall { get => lastinstall; set { if (value != lastinstall) { lastinstall = value; OnPropertyChanged(); } } }
+    }
+
+    public class LightCapabilitiesControlCt : NotifyChangeBase
+    {
+        private ushort min;
+        private ushort max;
+
+        [JsonProperty(PropertyName = "min")] //: 153,
+        public ushort Min { get => min; set { if (value != min) { min = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "max")] //: 500
+        public ushort Max { get => max; set { if (value != max) { max = value; OnPropertyChanged(); } } }
+    }
+
+    public class LightCapabilitiesControl : NotifyChangeBase
+    {
+
+        private ushort mindimlevel;
+        private ushort maxlumen;
+        private string colorgamuttype;
+        private float[][] colorgamut;
+        private LightCapabilitiesControlCt ct;
+
+        [JsonProperty(PropertyName = "mindimlevel")] //: 5000,
+        public ushort Mindimlevel { get => mindimlevel; set { if (value != mindimlevel) { mindimlevel = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "maxlumen")] //: 600,
+        public ushort Maxlumen { get => maxlumen; set { if (value != maxlumen) { maxlumen = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "colorgamuttype")] //: "B",
+        public string Colorgamuttype { get => colorgamuttype; set { if (value != colorgamuttype) { colorgamuttype = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "colorgamut")] //: [
+        public float[][] Colorgamut { get => colorgamut; set { if (value != colorgamut) { colorgamut = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "ct")] //: {
+        public LightCapabilitiesControlCt Ct { get => ct; set { if (value != ct) { ct = value; OnPropertyChanged(); } } }
+    }
+
+    public class LightCapabilitiesControlStreaming : NotifyChangeBase
+    {
+        private bool renderer;
+        private bool proxy;
+
+        [JsonProperty(PropertyName = "renderer")] //: true,
+        public bool Renderer { get => renderer; set { if (value != renderer) { renderer = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "proxy")] //: false
+        public bool Proxy { get => proxy; set { if (value != proxy) { proxy = value; OnPropertyChanged(); } } }
+    }
+
+
+    public class LightCapabilities : NotifyChangeBase
+    {
+        private bool certified;
+        private LightCapabilitiesControl control;
+        private LightCapabilitiesControlStreaming streaming;
+
+        [JsonProperty(PropertyName = "certified")] //: true,
+        public bool Certified { get => certified; set { if (value != certified) { certified = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "control")] //: {
+        public LightCapabilitiesControl Control { get => control; set { if (value != control) { control = value; OnPropertyChanged(); } } }
+
+        [JsonProperty(PropertyName = "streaming")] //: {
+        public LightCapabilitiesControlStreaming Streaming { get => streaming; set { if (value != streaming) { streaming = value; OnPropertyChanged(); } } }
+
+    }
+
+    public class LightConfig : NotifyChangeBase
+    {
+        private string archetype;
+        private string function;
+        private string direction;
+
+        [JsonProperty(PropertyName = "archetype")]//: "sultanbulb",
+        public string Archetype { get => archetype; set { if (value != archetype) { archetype = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "function")]//: "mixed",
+        public string Function { get => function; set { if (value != function) { function = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "direction")]//: "omnidirectional"
+        public string Direction { get => direction; set { if (value != direction) { direction = value; OnPropertyChanged(); } } }
+    }
+    public class Light : NotifyChangeBase
+    {
+        private string id;
+        private LightState state;
+        private SWUpdate swupdate;
+        private string _type;
+        private string name;
+        private string modelid;
+        private string manufacturername;
+        private string productname;
+        private LightCapabilities capabilities;
+        private LightConfig config;
+        private string uniqueid;
+        private string swversion;
+
+        public string Id { get => id; set { if (value != id) { id = value; OnPropertyChanged(); } } }
+
+        [JsonProperty(PropertyName = "state")]
+        public LightState State { get => state; set { if (value != state) { state = value; OnPropertyChanged(); } } }
+
+        [JsonProperty(PropertyName = "swupdate")]
+        public SWUpdate SWUpdate { get => swupdate; set { if (value != swupdate) { swupdate = value; OnPropertyChanged(); } } }
+
+        [JsonProperty(PropertyName = "type")] //: "Extended color light",
+        public string Type { get => _type; set { if (value != _type) { _type = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "name")] //: "Hue color lamp 7",
+        public string Name { get => name; set { if (value != name) { name = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "modelid")] //: "LCT007",
+        public string Modelid { get => modelid; set { if (value != modelid) { modelid = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "manufacturername")] //: "Philips",
+        public string Manufacturername { get => manufacturername; set { if (value != manufacturername) { manufacturername = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "productname")] //: "Hue color lamp",
+        public string Productname { get => productname; set { if (value != productname) { productname = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "capabilities")] //: {
+        public LightCapabilities Capabilities { get => capabilities; set { if (value != capabilities) { capabilities = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "config")]//: {
+        public LightConfig Config { get => config; set { if (value != config) { config = value; OnPropertyChanged(); } } }
+
+        [JsonProperty(PropertyName = "uniqueid")]
+        public string Uniqueid { get => uniqueid; set { if (value != uniqueid) { uniqueid = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "swversion")]//: "5.105.0.21169"
+        public string SWVersion { get => swversion; set { if (value != swversion) { swversion = value; OnPropertyChanged(); } } }
+
+        [JsonIgnore]
+        public List<Group> Groups { get; set; }
+    }
+
+    public class GroupAction : NotifyChangeBase
+    {
+        private bool? on;
+        private byte? bri;
+        private ushort? hue;
+        private byte? sat;
+        private float[] xy;
+        private ushort? ct;
+        private string alert;
+        private string effect;
+        private ushort? transitiontime;
+        private short? bri_inc;
+        private short? sat_inc;
+        private int? hue_inc;
+        private int? ct_inc;
+        private float? xy_inc;
+        private string scene;
+
+        [JsonProperty(PropertyName = "on")] //: false,
+        public bool? On { get => on; set { if (value != on) { on = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "bri")] //: 1,
+        public byte? Bri { get => bri; set { if (value != bri) { bri = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "hue")] //: 33761,
+        public ushort? Hue { get => hue; set { if (value != hue) { hue = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "sat")] //: 254,
+        public byte? Sat { get => sat; set { if (value != sat) { sat = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "xy")] //: [
+        public float[] XY { get => xy; set { if (value != xy) { xy = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "ct")] //: 159,
+        public ushort? CT { get => ct; set { if (value != ct) { ct = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "alert")] //: "none",
+        public string Alert { get => alert; set { if (value != alert) { alert = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "effect")] //: "none",
+        public string Effect { get => effect; set { if (value != effect) { effect = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "transitiontime")]
+        public ushort? Transitiontime { get => transitiontime; set { if (value != transitiontime) { transitiontime = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "bri_inc")]
+        public short? BriInc { get => bri_inc; set { if (value != bri_inc) { bri_inc = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "sat_inc")]
+        public short? SatInc { get => sat_inc; set { if (value != sat_inc) { sat_inc = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "hue_inc")]
+        public int? HueInc { get => hue_inc; set { if (value != hue_inc) { hue_inc = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "ct_inc")]
+        public int? CtInc { get => ct_inc; set { if (value != ct_inc) { ct_inc = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "xy_inc")]
+        public float? XyInc { get => xy_inc; set { if (value != xy_inc) { xy_inc = value; OnPropertyChanged(); } } }
+        [JsonProperty(PropertyName = "scene")]
+        public string Scene { get => scene; set { if (value != scene) { scene = value; OnPropertyChanged(); } } }
+    }
+
+
+    public class Group : NotifyChangeBase
+    {
+        private string id;
+        private string name;
+        private int[] lightindices;
+        private string _type;
+        private GroupAction action;
+        private List<Light> lights;
+
+        public string Id { get => id; set { if (value != id) { id = value; OnPropertyChanged(); } } }
 
         [JsonProperty(PropertyName = "name")]
-        public string Name { get; set; }
+        public string Name { get => name; set { if (value != name) { name = value; OnPropertyChanged(); } } }
 
         [JsonProperty(PropertyName = "lights")]
-        public int[] LightIndices { get; set; }
+        public int[] LightIndices { get => lightindices; set { if (value != lightindices) { lightindices = value; OnPropertyChanged(); } } }
 
         [JsonProperty(PropertyName = "type")]
-        public string Type { get; set; }
+        public string Type { get => _type; set { if (value != _type) { _type = value; OnPropertyChanged(); } } }
         [JsonProperty(PropertyName = "action")]
-        public GroupAction Action { get; set; }
+        public GroupAction Action { get => action; set { if (value != action) { action = value; OnPropertyChanged(); } } }
 
-        public List<Light> Lights { get; set; }
+        [JsonIgnore]
+        public List<Light> Lights { get => lights; set { if (value != lights) { lights = value; OnPropertyChanged(); } } }
     }
 
     public class GroupLightList : List<Light>
     {
         public Group Group { get; set; }
-        public string GroupName { get { return Group?.Name; } }
+        public string GroupName => Group?.Name; 
     }
 
     #endregion

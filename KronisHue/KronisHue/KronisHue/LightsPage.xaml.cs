@@ -6,7 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Windows.Input;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -20,7 +20,7 @@ namespace KronisHue
         {
             InitializeComponent();
 
-            LightsBindingContext = new LightsViewModel();
+            LightsBindingContext = new LightsViewModel(this);
             BindingContext = LightsBindingContext;
 
             App.Curr.OnBridgeFound += Curr_OnBridgeFound;
@@ -42,12 +42,22 @@ namespace KronisHue
 
         private async Task PopulateLightsAsync()
         {
-            var gll = await BridgeApiClient.Current.GetGroupLightListAsync();
-            LightsBindingContext.GroupLights = new ObservableCollection<GroupLightList>(gll);
+            try
+            {
+                var gll = await BridgeApiClient.Current.GetGroupLightListAsync();
+                LightsBindingContext.GroupLights = new ObservableCollection<GroupLightList>(gll);
+                ErrorLabel.IsVisible = false;
+            }
+            catch
+            {
+                ErrorLabel.IsVisible = true;
+            }
         }
 
-        class LightsViewModel : INotifyPropertyChanged
+        class LightsViewModel : NotifyChangeBase
         {
+            private readonly LightsPage page;
+
             private ObservableCollection<GroupLightList> grouplights;
             public ObservableCollection<GroupLightList> GroupLights
             {
@@ -63,21 +73,37 @@ namespace KronisHue
             }
 
 
-            public LightsViewModel()
+            public LightsViewModel(LightsPage page)
             {
+                this.page = page;
                 GroupLights = new ObservableCollection<GroupLightList>();
             }
 
-            #region INotifyPropertyChanged Implementation
-            public event PropertyChangedEventHandler PropertyChanged;
-            void OnPropertyChanged([CallerMemberName] string propertyName = "")
+            private bool _isRefreshing = false;
+            public bool IsRefreshing
             {
-                if (PropertyChanged == null)
-                    return;
-
-                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                get { return _isRefreshing; }
+                set
+                {
+                    _isRefreshing = value;
+                    OnPropertyChanged(nameof(IsRefreshing));
+                }
             }
-            #endregion
+
+            public ICommand RefreshCommand
+            {
+                get
+                {
+                    return new Command(async () =>
+                    {
+                        IsRefreshing = true;
+
+                        await page.PopulateLightsAsync();
+
+                        IsRefreshing = false;
+                    });
+                }
+            }
         }
 
         private async void GroupSwitch_Toggled(object sender, ToggledEventArgs e)

@@ -6,7 +6,7 @@
     <ContentPage.Content>
         <StackLayout Orientation="Vertical">
             <ListView ItemsSource="{Binding GroupLights}" x:Name="LightsListView" IsVisible="True"
-                IsGroupingEnabled="true" HasUnevenRows="true">
+                IsGroupingEnabled="true" HasUnevenRows="true" IsPullToRefreshEnabled="True" IsRefreshing="{Binding IsRefreshing}" RefreshCommand="{Binding RefreshCommand}">
                 <ListView.GroupHeaderTemplate>
                     <DataTemplate>
                         <ViewCell>
@@ -41,6 +41,7 @@
                 </ListView.ItemTemplate>
             </ListView>
             <Button Text="Details" x:Name="DetailsButton" Clicked="DetailsButton_Clicked"/>
+            <Label Text="Error" x:Name="ErrorLabel" BackgroundColor="Red" IsVisible="False"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>

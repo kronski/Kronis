@@ -25,7 +25,7 @@ namespace KronisHue
             ListView = MenuItemsListView;
         }
 
-        class MainMasterViewModel : INotifyPropertyChanged
+        class MainMasterViewModel : NotifyChangeBase
         {
             public ObservableCollection<MainMenuItem> MenuItems { get; set; }
             
@@ -37,17 +37,6 @@ namespace KronisHue
                     new MainMenuItem { Id = 1, Title = "Settings", TargetType=typeof(SettingsPage) },
                 });
             }
-            
-            #region INotifyPropertyChanged Implementation
-            public event PropertyChangedEventHandler PropertyChanged;
-            void OnPropertyChanged([CallerMemberName] string propertyName = "")
-            {
-                if (PropertyChanged == null)
-                    return;
-
-                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
-            }
-            #endregion
         }
     }
 }

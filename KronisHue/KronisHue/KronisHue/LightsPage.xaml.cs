@@ -46,12 +46,24 @@ namespace KronisHue
             {
                 var gll = await BridgeApiClient.Current.GetGroupLightListAsync();
                 LightsBindingContext.GroupLights = new ObservableCollection<GroupLightList>(gll);
-                ErrorLabel.IsVisible = false;
+                ResetError();
+
             }
             catch
             {
-                ErrorLabel.IsVisible = true;
+                ShowError("Unable to get lights");
             }
+        }
+
+        private void ResetError()
+        {
+            ErrorLabel.IsVisible = false;
+        }
+
+        private void ShowError(string error)
+        {
+            ErrorLabel.Text = error;
+            ErrorLabel.IsVisible = true;
         }
 
         class LightsViewModel : NotifyChangeBase
@@ -118,21 +130,38 @@ namespace KronisHue
                 On = e.Value
             };
 
-            await BridgeApiClient.Current.SetGroupActionAsync(gll.Group, ga);
+            try
+            {
+                await BridgeApiClient.Current.SetGroupActionAsync(gll.Group, ga);
+                ResetError();
+            }
+            catch
+            {
+                ShowError("Unable to update group");
+            }
+
+
         }
 
         private async void LightSwitch_Toggled(object sender, ToggledEventArgs e)
         {
             Light l = (Light)((Switch)sender).BindingContext;
-            if (l==null || l.State.On == e.Value)
+            if (l == null || l.State.On == e.Value)
                 return;
 
             LightState ls = new LightState
             {
                 On = e.Value
             };
-
-            await BridgeApiClient.Current.SetLightStateAsync(l, ls);
+            try
+            {
+                await BridgeApiClient.Current.SetLightStateAsync(l, ls);
+                ShowError("Unable to update group");
+            }
+            catch
+            {
+                ResetError();
+            }
         }
 
         private async void DetailsButton_Clicked(object sender, EventArgs e)

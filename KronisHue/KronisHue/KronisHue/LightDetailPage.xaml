@@ -4,42 +4,23 @@
              x:Class="KronisHue.LightDetailPage"
              NavigationPage.HasNavigationBar="False"
              xmlns:dg="clr-namespace:Xamarin.Forms.DataGrid;assembly=Xamarin.Forms.DataGrid"
-             xmlns:conv="clr-namespace:DataGridSample.Views.Converters;assembly=DataGridSample">
+             xmlns:local="clr-namespace:KronisHue">
     <ContentPage.Content>
-        <!--<ListView ItemsSource="{Binding Properties}" x:Name="PropertiesListView">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <ViewCell>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Label Text="{Binding Property}" Margin="20,0" FontSize="20"/>
-                            <Label Text="{Binding Value}" FontSize="20" Grid.Column="1"/>
-                        </Grid>
-                    </ViewCell>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>-->
-
         <dg:DataGrid ItemsSource="{Binding Properties}" SelectionEnabled="False" HeaderHeight="30" BorderColor="#CCCCCC" HeaderBackground="#E0E6F8">
             <dg:DataGrid.Columns>
                 <dg:DataGridColumn Title="Property">
                     <dg:DataGridColumn.CellTemplate>
                         <DataTemplate>
-                            <ContentView HorizontalOptions="Fill" VerticalOptions="Fill">
-                                <Label Text="{Binding Property}" HorizontalOptions="Start" VerticalOptions="Center" TextColor="Black" FontAttributes="Bold" FontSize="Medium" Margin="10,0"/>
-                            </ContentView>
+                            <!--<ContentView HorizontalOptions="Fill" VerticalOptions="Fill">-->
+                            <Label Text="{Binding Property}" HorizontalOptions="Start" VerticalOptions="Center" TextColor="Black" FontAttributes="Bold" FontSize="Medium" />
+                            <!--</ContentView>-->
                         </DataTemplate>
                     </dg:DataGridColumn.CellTemplate>
                 </dg:DataGridColumn>
                 <dg:DataGridColumn Title="Value">
                     <dg:DataGridColumn.CellTemplate>
                         <DataTemplate>
-                            <ContentView HorizontalOptions="Fill" VerticalOptions="Fill">
-                                <Label Text="{Binding Value}" HorizontalOptions="Start" VerticalOptions="Center" TextColor="Black" FontSize="Medium" Margin="10,0"/>
-                            </ContentView>
+                            <local:PropertyView HorizontalOptions="Fill" VerticalOptions="Center" Margin="10,0" PropertyObject="{Binding Value}" ControlAttribute="{Binding ControlAttribute}"/>
                         </DataTemplate>
                     </dg:DataGridColumn.CellTemplate>
                 </dg:DataGridColumn>

@@ -22,7 +22,6 @@ namespace KronisHue
         {
             InitializeComponent();
 
-            
             BindingContext = new DetailsViewModel(light);
             
         }
@@ -36,6 +35,7 @@ namespace KronisHue
         {
             public string Property { get; set; }
             public object Value { get; set; }
+            public BindingControlAttribute ControlAttribute { get; set; }
         }
 
         class DetailsViewModel : NotifyChangeBase
@@ -62,19 +62,23 @@ namespace KronisHue
 
                 void BuildProperties(object baseobj, string basename)
                 {
+                    List<(object obj, string basepath)> laterobjects = null;
                     PropertyInfo[] pia = baseobj.GetType().GetProperties();
                     foreach (PropertyInfo pi in pia)
                     {
                         if (!pi.PropertyType.IsPublic)
                             continue;
                         Debug.WriteLine(basename + pi.Name);
+                        BindingControlAttribute bca = pi.GetCustomAttribute<BindingControlAttribute>();
+
                         var obj = pi.GetValue(baseobj);
                         if (obj == null)
                         {
                             p.Add(new LightDetailProperty()
                             {
                                 Property = basename + pi.Name,
-                                Value = null
+                                Value = null,
+                                ControlAttribute = bca
                             });
                         }
                         else if (pi.PropertyType == typeof(Light))
@@ -87,31 +91,38 @@ namespace KronisHue
                             p.Add(new LightDetailProperty()
                             {
                                 Property = basename + pi.Name,
-                                Value = json
+                                Value = json,
+                                ControlAttribute = bca
                             });
                         }
                         else if (pi.PropertyType.IsClass && pi.PropertyType != typeof(string))
                         {
-                            BuildProperties(obj, basename + pi.Name+".");
+                            if (laterobjects == null)
+                                laterobjects = new List<(object, string)>();
+                            laterobjects.Add((obj, basename + pi.Name + "."));
                         }
                         else
                         {
                             p.Add(new LightDetailProperty()
                             {
                                 Property = basename + pi.Name,
-                                Value = obj?.ToString()
+                                Value = obj,
+                                ControlAttribute = bca
                             });
                         }
                     }
+
+                    laterobjects?.ForEach(obj => {
+                        BuildProperties(obj.obj, obj.basepath);
+                    });
                 }
 
                 BuildProperties(light,"");
-
-                
 
                 Properties = p;
             }
         }
 
+        
     }
 }

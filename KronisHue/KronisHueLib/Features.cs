@@ -12,10 +12,17 @@ using Newtonsoft.Json.Serialization;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.IO;
-using System.Diagnostics;
+using Xamarin.Forms;
 
 namespace KronisHue
 {
+    public class BindingControlAttribute : Attribute
+    {
+        public Type ControlType { get; set; }
+        public double Min { get; set; }
+        public double Max { get; set; }
+    }
+
     public class BridgeLocator
     {
         public static async Task<string[]> FindHueBridgeViaMeetHue()
@@ -79,11 +86,13 @@ namespace KronisHue
         private string mode;
         private bool? reachable;
 
-
+        [BindingControl(ControlType = typeof(Switch))]
         [JsonProperty(PropertyName = "on")] //: false,
         public bool? On { get => on; set { if (value != on) { on = value; OnPropertyChanged(); } } }
+        [BindingControl(ControlType = typeof(Slider),Max = 255, Min = 0)]
         [JsonProperty(PropertyName = "bri")] //: 1,
         public byte? Bri { get => bri; set { if (value != bri) { bri = value; OnPropertyChanged(); } } }
+        [BindingControl(ControlType = typeof(Slider), Max = 65535, Min = 0)]
         [JsonProperty(PropertyName = "hue")] //: 33761,
         public ushort? Hue { get => hue; set { if (value != hue) { hue = value; OnPropertyChanged(); } } }
         [JsonProperty(PropertyName = "sat")] //: 254,
@@ -406,7 +415,7 @@ namespace KronisHue
             }
             catch 
             {
-                Debug.WriteLine(json);
+                System.Diagnostics.Debug.WriteLine(json);
                 throw;
             }
         }

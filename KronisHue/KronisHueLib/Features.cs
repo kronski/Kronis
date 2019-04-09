@@ -38,7 +38,7 @@ namespace KronisHue
             var devices = await finder.FindDevicesAsync(
                 device =>
                 {
-                    if(device.Info.FriendlyName.StartsWith("Philips hue"))
+                    if(device?.Info?.FriendlyName.StartsWith("Philips hue") == true)
                     {
                         found(device.RemoteEndPoint.ToString());
                     }

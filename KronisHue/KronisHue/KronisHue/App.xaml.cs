@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -30,46 +29,38 @@ namespace KronisHue
             BridgeApiClient.Init();
             if (Properties.TryGetValue("Username", out object value) && value is string v)
                 BridgeApiClient.Current.Username = v;
-            BackgroundWorker backgroundWorker = new BackgroundWorker();
-            backgroundWorker.DoWork += FindHueBridgeViaUpnpInBackground;
-            backgroundWorker.RunWorkerAsync();
 
-            BackgroundWorker backgroundWorker2 = new BackgroundWorker();
-            backgroundWorker2.DoWork += FindHueBridgeViaMeetHueInBackground;
-            backgroundWorker2.RunWorkerAsync();
+            Task.Run(async () =>
+            {
+                await BridgeLocator.FindHueBridgeViaUpnp(
+                    bridge =>
+                    {
+                        AddBridge(bridge);
+                    }, null
+                );
+            });
 
-        }
-
-        private async void FindHueBridgeViaUpnpInBackground(object sender, DoWorkEventArgs e)
-        {
-            await BridgeLocator.FindHueBridgeViaUpnp(
-                bridge =>
+            Task.Run(async () =>
+            {
+                try
                 {
-                    AddBridge(bridge);
-                }, null
-            );
+                    var bridges = await BridgeLocator.FindHueBridgeViaMeetHue();
+                    foreach (string bridge in bridges)
+                        AddBridge(bridge);
+                }
+                catch
+                {
+                }
+            });
         }
 
-        private async void FindHueBridgeViaMeetHueInBackground(object sender, DoWorkEventArgs e)
-        {
-            try
-            {
-                var bridges = await BridgeLocator.FindHueBridgeViaMeetHue();
-                foreach (string bridge in bridges)
-                    AddBridge(bridge);
-            }
-            catch
-            {
-            }
-        }
-        
         private void AddBridge(string bridge)
         {
-            if (!BridgeApiClient.Current.Bridges.Contains(bridge))
+            if (BridgeApiClient.Current?.Bridges.Contains(bridge) == false)
             {
                 BridgeApiClient.Current.Bridges.Add(bridge);
 
-                if(BridgeApiClient.Current.IP ==null)
+                if(BridgeApiClient.Current.IP == null)
                 {
                     BridgeApiClient.Current.IP = bridge;
                     OnBridgeFound(this,bridge);

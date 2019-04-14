@@ -62,6 +62,8 @@ namespace KronisHue
 
                 if(BridgeApiClient.Current.IP == null)
                 {
+                    Properties["LastIP"] = bridge;
+
                     BridgeApiClient.Current.IP = bridge;
                     OnBridgeFound(this,bridge);
                 }

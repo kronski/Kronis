@@ -13,6 +13,8 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.IO;
 using Xamarin.Forms;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 
 namespace KronisHue
 {
@@ -75,8 +77,8 @@ namespace KronisHue
     public class LightState : NotifyChangeBase
     {
         private bool? on;
-        private byte? bri;
-        private ushort? hue;
+        private long? bri;
+        private long? hue;
         private byte? sat;
         private string effect;
         private float[] xy;
@@ -91,10 +93,10 @@ namespace KronisHue
         public bool? On { get => on; set { if (value != on) { on = value; OnPropertyChanged(); } } }
         [BindingControl(ControlType = typeof(Slider),Max = 255, Min = 0)]
         [JsonProperty(PropertyName = "bri")] //: 1,
-        public byte? Bri { get => bri; set { if (value != bri) { bri = value; OnPropertyChanged(); } } }
+        public long? Bri { get => bri; set { if (value != bri) { bri = value; OnPropertyChanged(); } } }
         [BindingControl(ControlType = typeof(Slider), Max = 65535, Min = 0)]
         [JsonProperty(PropertyName = "hue")] //: 33761,
-        public ushort? Hue { get => hue; set { if (value != hue) { hue = value; OnPropertyChanged(); } } }
+        public long? Hue { get => hue; set { if (value != hue) { hue = value; OnPropertyChanged(); } } }
         [JsonProperty(PropertyName = "sat")] //: 254,
         public byte? Sat { get => sat; set { if (value != sat) { sat = value; OnPropertyChanged(); } } }
         [JsonProperty(PropertyName = "effect")] //: "none",
@@ -350,8 +352,6 @@ namespace KronisHue
             Bridges = new HashSet<string>();
         }
 
-        
-
         public async Task<string> NewDeveloperAsync()
         {
             if (IP == null)
@@ -536,8 +536,10 @@ namespace KronisHue
                         }
                     }
                 }
+
+                UpdateGroups(light);
             }
-            UpdateGroups(light);
+            
         }
 
         public void UpdateGroups(Light light)

@@ -13,11 +13,14 @@ namespace KronisHue
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class LightDetailPage : ContentPage
     {
+        readonly Light currentlight;
+        Dictionary<View, string> controls = new Dictionary<View, string>();
+
         public LightDetailPage(Light light)
         {
+            currentlight = light;
             InitializeComponent();
-
-            BuildGridContent(light);
+            BuildGridContent();
             FillTable();
         }
 
@@ -43,6 +46,7 @@ namespace KronisHue
                 };
                 label.SizeChanged += Label_SizeChanged;
 
+
                 Grid.Children.Add(
                     new Frame()
                     {
@@ -51,46 +55,49 @@ namespace KronisHue
                         BorderColor = Color.Silver,
                         Content = label
                     }, 0, c.Row);
-                
+
+                View control = null;
                 if (c?.ControlAttribute?.ControlType == typeof(Switch))
                 {
-                    Grid.Children.Add(
-                        new Frame()
-                        {
-                            Padding = 2,
-                            BorderColor = Color.Silver,
-                            Margin = rm,
-                            Content = new Switch()
-                            {
-                                HorizontalOptions = LayoutOptions.Fill,
-                                IsToggled = Convert.ToBoolean(c.Value),
-                                //BackgroundColor = c.BackgroundColor
-                            }
-                        }, 1, c.Row
-                    );
+                    control = new Switch()
+                    {
+                        HorizontalOptions = LayoutOptions.Fill,
+                        IsToggled = Convert.ToBoolean(c.Value),
+                    };
+                    ((Switch)control).Toggled += Control_Toggled;
+
+                    controls.Add(control, c.Property);
                 }
                 else if (c?.ControlAttribute?.ControlType == typeof(Slider))
                 {
-                    Grid.Children.Add(
-                        new Frame()
-                        {
-                            Padding = 2,
-                            BorderColor = Color.Silver,
-                            Margin = rm,
-                            Content = new Slider()
-                            {
-                                HorizontalOptions = LayoutOptions.Fill,
-                                Minimum = c.ControlAttribute.Min,
-                                Maximum = c.ControlAttribute.Max,
-                                Value = Convert.ToDouble(c.Value),
-                                MinimumTrackColor = Color.Green,
-                                MaximumTrackColor = Color.Red,
-                                //BackgroundColor = c.BackgroundColor
-                            }
-                        }, 1, c.Row
-                    );
+                    control = new Slider()
+                    {
+                        HorizontalOptions = LayoutOptions.Fill,
+                        Minimum = c.ControlAttribute.Min,
+                        Maximum = c.ControlAttribute.Max,
+                        Value = Convert.ToDouble(c.Value),
+                        MinimumTrackColor = Color.Green,
+                        MaximumTrackColor = Color.Red,
+                        //BackgroundColor = c.BackgroundColor
+                    };
+
+                    ((Slider)control).ValueChanged += Control_ValueChanged;
+                    controls.Add(control, c.Property);
                 }
                 else
+                {
+                    control = new Label()
+                    {
+                        Margin = leftm,
+                        HorizontalOptions = LayoutOptions.Fill,
+                        Text = c.Value?.ToString(),
+                        //BackgroundColor = c.BackgroundColor
+                    };
+                }
+
+
+
+                if (control != null)
                 {
                     Grid.Children.Add(
                         new Frame()
@@ -98,15 +105,57 @@ namespace KronisHue
                             Padding = 2,
                             BorderColor = Color.Silver,
                             Margin = rm,
-                            Content = new Label()
-                            {
-                                Margin = leftm,
-                                HorizontalOptions = LayoutOptions.Fill,
-                                Text = c.Value?.ToString(),
-                                //BackgroundColor = c.BackgroundColor
-                            }
+                            Content = control
                         }, 1, c.Row
                     );
+                }
+            }
+        }
+
+        private async void Control_ValueChanged(object sender, ValueChangedEventArgs e)
+        {
+            if (controls.TryGetValue(sender as View, out var controlname))
+            {
+                try
+                {
+                    switch (controlname)
+                    {
+                        case "State.Bri":
+                        case "State.Hue":
+                            await BridgeApiClient.Current.SetLightStateAsync(currentlight, new LightState()
+                            {
+                                Bri = (controlname== "State.Bri") ? (long?)Convert.ToInt64(e.NewValue) : null,
+                                Hue = (controlname == "State.Hue") ? (long?)Convert.ToInt64(e.NewValue) : null,
+                            });
+                            break;
+                    }
+                }
+                catch
+                {
+
+                }
+            }
+        }
+
+        private async void Control_Toggled(object sender, ToggledEventArgs e)
+        {
+            if (controls.TryGetValue(sender as View, out var controlname))
+            {
+                try
+                {
+                    switch (controlname)
+                    {
+                        case "State.On":
+                            await BridgeApiClient.Current.SetLightStateAsync(currentlight, new LightState()
+                            {
+                                On = e.Value
+                            });
+                            break;
+                    }
+                }
+                catch
+                {
+
                 }
             }
         }
@@ -143,7 +192,7 @@ namespace KronisHue
             }
         }
 
-        public void BuildGridContent(Light light)
+        public void BuildGridContent()
         {
             ObservableCollection<LightDetailProperty>  p = new ObservableCollection<LightDetailProperty>();
 
@@ -208,7 +257,7 @@ namespace KronisHue
                 });
             }
 
-            BuildProperties(light,"");
+            BuildProperties(currentlight,"");
 
             GridContent = p;
         }

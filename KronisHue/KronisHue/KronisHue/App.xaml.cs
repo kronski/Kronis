@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -22,6 +23,34 @@ namespace KronisHue
         protected override void OnStart()
         {
             InitBridge();
+            InitAppLink();
+        }
+
+        private void InitAppLink()
+        {
+            try
+            {
+                var url = $"https://kronishue.azurewebsites.net/app";
+
+                var entry = new AppLinkEntry
+                {
+                    Title = "KronisHue",
+                    Description = "KronisHue",
+                    AppLinkUri = new Uri(url, UriKind.RelativeOrAbsolute),
+                    IsLinkActive = true,
+                    Thumbnail = ImageSource.FromFile("Icon.png")
+                };
+
+                entry.KeyValues.Add("contentType", "Session");
+                entry.KeyValues.Add("appName", "Kronis Hue");
+                entry.KeyValues.Add("companyName", "DataPolarna AB");
+
+                Application.Current.AppLinks.RegisterLink(entry);
+            }
+            catch(Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
         }
 
         private void InitBridge()
@@ -78,6 +107,11 @@ namespace KronisHue
         protected override void OnResume()
         {
             InitBridge();
+        }
+
+        protected override void OnAppLinkRequestReceived(Uri uri)
+        {
+            base.OnAppLinkRequestReceived(uri);
         }
     }
 }

@@ -33,5 +33,7 @@ namespace KronisHue
 
             MasterPage.ListView.SelectedItem = null;
         }
+
+
     }
 }

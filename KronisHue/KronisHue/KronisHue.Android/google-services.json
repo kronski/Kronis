@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "36133739948",
+    "firebase_url": "https://kronishue.firebaseio.com",
+    "project_id": "kronishue",
+    "storage_bucket": "kronishue.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:36133739948:android:7397b2f0aaabc246",
+        "android_client_info": {
+          "package_name": "se.datapolarna.KronisHue.Android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "36133739948-oordgust7reo6dihevsuro0srbr85554.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "se.datapolarna.KronisHue.Android",
+            "certificate_hash": "244d140ddfc95cfe417f0a261985c621892e44cf"
+          }
+        },
+        {
+          "client_id": "36133739948-5blbrrq8ni3vi7qkldinn0cir23cb40h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClHkbmMShNuzpEFrOh_OByYIGjkw2Lrgk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "36133739948-5blbrrq8ni3vi7qkldinn0cir23cb40h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

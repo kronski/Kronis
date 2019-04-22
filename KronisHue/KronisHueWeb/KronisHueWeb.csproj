@@ -6,28 +6,11 @@
     <TypeScriptToolsVersion>3.3</TypeScriptToolsVersion>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Content Remove="wwwroot\js\auth.ts" />
-    <Content Remove="wwwroot\js\authgranted.ts" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="wwwroot\js\auth.js" />
-    <None Include="wwwroot\js\auth.js.map" />
-    <None Include="wwwroot\js\auth.ts" />
-  </ItemGroup>
-
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
-  </ItemGroup>
-
-
-  <ItemGroup>
-    <TypeScriptCompile Include="wwwroot\js\auth.ts" />
-    <TypeScriptCompile Include="wwwroot\js\authgranted.ts" />
   </ItemGroup>
 
 </Project>

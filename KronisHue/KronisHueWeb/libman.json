@@ -1,7 +1,9 @@
 {
   "version": "1.0",
   "defaultProvider": "cdnjs",
+  "defaultDestination": "wwwroot/lib",
   "libraries": [
-    {"library": "spark-md5@3.0.0", "destination": "wwwroot/lib/spark-md5"}
+    { "library": "twitter-bootstrap@4.3.1" },
+    { "library": "jquery@3.4.0", "destination": "wwwroot/lib/js" }
   ]
 }

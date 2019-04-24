@@ -6,7 +6,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import * as md5 from '../node_modules/ts-md5/dist/md5.js';
+import * as md5 from '../node_modules/ts-md5/src/md5.js';
 export class KronisHue {
     constructor() {
         this.code = window.localStorage.getItem("code");

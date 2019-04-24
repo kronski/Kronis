@@ -1,0 +1,22 @@
+{
+  "name": "kronishueweb",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "private": true,
+  "dependencies": {
+    "@types/jquery": "^3.3.29",
+    "ts-md5": "^1.2.4"
+  },
+  "devDependencies": {},
+  "author": "",
+  "license": "ISC",
+  "publishOptions": {
+    "include": [
+      "web.config",
+      "wwwroot",
+      "Views",
+      "node_modules"
+    ]
+  }
+}

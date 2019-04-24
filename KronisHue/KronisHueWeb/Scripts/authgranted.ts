@@ -1,4 +1,5 @@
-import { KronisHue } from "./kronishue";
+﻿import { KronisHue } from "./kronishue";
+
 $(function () {
     let hue = new KronisHue();
     if (hue.storeCode()) {

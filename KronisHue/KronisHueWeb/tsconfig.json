@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "noEmitOnError": true,
+    "removeComments": true,
+    "alwaysStrict": true,
+    "target": "es6",
+    "strictNullChecks": true,
+    "outDir": "wwwroot/js",
+    "typeRoots": [
+      "node_modules/@types"
+    ]
+  },
+  "include": [
+    "Scripts/**/*",
+    "Types/**/*"
+  ]
+
+}

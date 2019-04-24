@@ -6,11 +6,23 @@
     <TypeScriptToolsVersion>3.3</TypeScriptToolsVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Content Include="Scripts\authgranted.ts" />
+    <Content Include="Scripts\index.ts" />
+    <Content Include="Scripts\kronishue.ts" />
+    <Content Include="Scripts\settings.ts" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Folder Include="Types\" />
   </ItemGroup>
 
 </Project>

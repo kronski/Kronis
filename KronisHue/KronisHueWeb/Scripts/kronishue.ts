@@ -1,26 +1,50 @@
-﻿import * as md5 from '../node_modules/ts-md5/dist/md5.js';
-
-export class KronisHue {
+﻿class KronisHueData {
     code: string | null;
     state: string | null;
     deviceid: string | null;
     devicename: string | null;
-    clientid: string | null;
-    appid: string | null;
+    nonce: string | null;
 
-    constructor() {
-        this.code = window.localStorage.getItem("code");
-        this.state = window.localStorage.getItem("state");
+    access_token: string | null;
+    access_token_expires_in: string | null;
+    refresh_token: string | null;
+    refresh_token_expires_in: string | null;
+    token_type: string | null;
 
-        this.deviceid = window.localStorage.getItem("deviceid");
-        if (!this.deviceid) {
-            this.deviceid = this.getRandomStr(64);
+    username: string|null;
+};
 
-            window.localStorage.setItem("deviceid", this.deviceid);
+export class KronisHue {
+
+    data: KronisHueData;
+    useLocalstorage: boolean;
+
+    constructor(useLocalstorage: boolean = true) {
+        this.useLocalstorage = useLocalstorage;
+        
+        this.loadFromLocalStorage();
+    }
+
+    loadFromLocalStorage() {
+        if (!this.useLocalstorage)
+            return;
+
+        let jsonstr = window.localStorage.getItem("kronisHueData");
+        if (jsonstr) {
+            this.data = JSON.parse(jsonstr);
         }
-        this.devicename = this.deviceid;
-        this.clientid = "RZNWVvJBddeczq9ekYvi3nnRMCYi9jdU";
-        this.appid = "kronishue";
+        else
+            this.data = new KronisHueData();
+
+    }
+
+    saveToLocalStorage() {
+        if (!this.useLocalstorage)
+            return;
+
+        var jsonstr = JSON.stringify(this.data);
+        let str = JSON.parse(jsonstr);
+        window.localStorage.setItem("kronisHueData", jsonstr);
     }
 
     getRandomStr(length: number): string {
@@ -37,51 +61,153 @@ export class KronisHue {
     }
 
     getAuthLink() {
-        this.state = this.getRandomStr(64);
-        window.localStorage.setItem("state", this.state);
+        this.data.state = this.getRandomStr(64);
+        this.saveToLocalStorage();
 
-        const linkhref = `https://api.meethue.com/oauth2/auth?clientid=${this.clientid}&appid=${this.appid}&deviceid=${this.deviceid}&devicename=${this.devicename}&state=${this.state}&response_type=code`;
-
-        return linkhref;
+        return fetch("/api/kronishue/appinfo", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                nonce: this.data.nonce,
+                code: this.data.code
+            })
+        }).then((response) => {
+            return response.json().then((o) => {
+                const linkhref = `https://api.meethue.com/oauth2/auth?clientid=${o.clientid}&appid=${o.appid}&deviceid=${this.data.deviceid}&devicename=${this.data.devicename}&state=${this.data.state}&response_type=code`;
+                return linkhref;
+            });
+        }).catch(() => {
+            return null;
+        });
     }
 
 
     storeCode(): boolean {
-        let state = window.localStorage.getItem("state");
+        let state = this.data.state;
         let url_string = window.location.href
         let url = new URL(url_string);
         let requeststate = url.searchParams.get("state");
         let requestcode = url.searchParams.get("code");
 
         if (state == requeststate) {
-            if (requestcode)
-                window.localStorage.setItem("code", requestcode);
-            return true;
+            if (requestcode) {
+                this.data.code = requestcode;
+                this.saveToLocalStorage();
+                return true;
+            }
+            return false;
         }
         else {
             return false;
         }
     }
 
-    async getNonce() {
-        await $.ajax({
-            url: `https://api.meethue.com/oauth2/token?code=${this.code}&grant_type=authorization_code`,
-            type: 'POST'
+    async refreshNonce() {
+        return fetch('/api/kronishue/nonce', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ code: this.data.code })
+        }).then((response) => {
+            return response.text().then((nonce) => {
+                this.data.nonce = nonce;
+                this.saveToLocalStorage();
+                return this.data.nonce;
+            });
+        }).catch(() => {
+            this.data.nonce = null;
+            this.saveToLocalStorage();
+            return this.data.nonce;
         });
     }
 
-    async getTokenWithDigest(nonce: string) {
-        let HASH1 = md5.Md5.hashStr("kVWjgzqk8hayM38pAudrA6psflju6k0T:oauth2_client@api.meethue.com:GHFV3f4L736bwgEB");
-        let HASH2 = md5.Md5.hashStr("POST:/oauth2/token");
-        let response = md5.Md5.hashStr(HASH1 + ":" + "7b6e45de18ac4ee452ee0a0de91dbb10" + ":" + HASH2);
-
-        let authheader = `Digest username="${this.clientid}", realm="oauth2_client@api.meethue.com", nonce="${nonce}", uri="/oauth2/token", response="${response}"`;
-
-        await $.ajax({
-            url: `https://api.meethue.com/oauth2/token?code=${this.code}&grant_type=authorization_code`,
+    async getTokenWithDigest() {
+        return fetch("/api/kronishue/token", {
+            method: "POST",
             headers: {
-                "Authorization": authheader
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                nonce: this.data.nonce,
+                code: this.data.code
+            })
+        }).then((response) => {
+            if (response.ok) {
+                return response.json().then((data) => {
+                    this.data.access_token = data.access_token;
+                    this.data.access_token_expires_in = data.access_token_expires_in;
+                    this.data.refresh_token = data.refresh_token;
+                    this.data.refresh_token_expires_in = data.refresh_token_expires_in;
+                    this.data.token_type = data.token_type;
+                    this.saveToLocalStorage();
+
+                    return data;
+                });
             }
+
+        }).catch(() => {
+            return null;
         });
+
+    }
+    async refreshTokenWithDigest() {
+        return fetch("/api/kronishue/refreshtoken", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                nonce: this.data.nonce,
+                code: this.data.code,
+                refresh_token: this.data.refresh_token
+            })
+        }).then((response) => {
+            if (response.ok) {
+                return response.json().then((data) => {
+                    this.data.access_token = data.access_token;
+                    this.data.access_token_expires_in = data.access_token_expires_in;
+                    this.data.refresh_token = data.refresh_token;
+                    this.data.refresh_token_expires_in = data.refresh_token_expires_in;
+                    this.data.token_type = data.token_type;
+                    this.saveToLocalStorage();
+
+                    return data;
+                });
+            }
+
+        }).catch(() => {
+            return null;
+        });
+
+    }
+
+
+    async setDeviceType() {
+        return fetch("/api/kronishue/setdevicetype", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                token: this.data.access_token,
+                devicetype: "kronishueweb"
+            })
+        }).then((response) => {
+            if (response.ok) {
+                return response.json().then((data) => {
+                    this.data.username = data.username;
+                    this.saveToLocalStorage();
+
+                    return data;
+                });
+            }
+
+        }).catch(() => {
+            return null;
+        });
+
     }
 }

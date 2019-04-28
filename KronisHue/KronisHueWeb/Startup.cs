@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace KronisHueWeb
 {
@@ -20,8 +21,6 @@ namespace KronisHueWeb
         {
             Configuration = configuration;
         }
-
-        readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
         public IConfiguration Configuration { get; }
 
@@ -35,17 +34,12 @@ namespace KronisHueWeb
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
-            services.AddCors(options =>
-            {
-                options.AddPolicy(MyAllowSpecificOrigins,
-                    builder =>
-                    {
-                        builder.WithOrigins("*");
-                    });
-            });
-
-
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "KronisHueAPI", Version = "v1" });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -73,7 +67,16 @@ namespace KronisHueWeb
             });
             app.UseStaticFiles();
             app.UseCookiePolicy();
-            app.UseCors(MyAllowSpecificOrigins);
+
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 
+            // specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "KronisHueAPI V1");
+            });
 
             app.UseMvc();
         }

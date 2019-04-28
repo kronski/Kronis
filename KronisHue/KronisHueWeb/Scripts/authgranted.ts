@@ -1,4 +1,4 @@
-﻿import { KronisHue } from "./kronishue";
+﻿import { KronisHue } from "./kronishue.js";
 
 $(function () {
     let hue = new KronisHue();

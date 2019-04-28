@@ -11,7 +11,8 @@ namespace KronisHueWeb.Pages
     {
         public void OnGet()
         {
-
+            Response.Headers["Access-Control-Allow-Origin"]="https://localhost:5001";
+            
         }
     }
 }

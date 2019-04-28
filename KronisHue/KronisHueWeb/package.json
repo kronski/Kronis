@@ -5,8 +5,7 @@
   "main": "index.js",
   "private": true,
   "dependencies": {
-    "@types/jquery": "^3.3.29",
-    "ts-md5": "^1.2.4"
+    "@types/jquery": "^3.3.29"
   },
   "devDependencies": {},
   "author": "",

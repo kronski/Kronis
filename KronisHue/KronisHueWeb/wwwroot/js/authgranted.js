@@ -1,4 +1,4 @@
-import { KronisHue } from "./kronishue";
+import { KronisHue } from "./kronishue.js";
 $(function () {
     let hue = new KronisHue();
     if (hue.storeCode()) {
@@ -8,3 +8,4 @@ $(function () {
         $("#result").text("Authorization failed");
     }
 });
+//# sourceMappingURL=authgranted.js.map

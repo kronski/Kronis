@@ -26,4 +26,9 @@
     <Folder Include="wwwroot\js\" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <ProjectReference Include="..\KronisHueLib\KronisHueLib.csproj" />
+  </ItemGroup>
+
 </Project>

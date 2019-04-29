@@ -344,7 +344,7 @@ namespace KronisHue
 
         public HashSet<string> Bridges { get; set; }
 
-        public string IP { get; set; }
+        public string BaseApiUrl { get; set; }
         public string Username { get; set; }
 
         public BridgeApiClient()
@@ -354,10 +354,10 @@ namespace KronisHue
 
         public async Task<string> NewDeveloperAsync()
         {
-            if (IP == null)
+            if (BaseApiUrl == null)
                 throw new Exception("Bridge not set");
 
-            string uri = $"http://{IP}/api";
+            string uri = BaseApiUrl;
 
             using (var httpClient = new HttpClient())
             {
@@ -386,7 +386,7 @@ namespace KronisHue
             if (!CheckBridge())
                 return new Light[0];
 
-            string uri = $"http://{IP}/api/{Username}/lights";
+            string uri = $"{BaseApiUrl}/{Username}/lights";
 
             using (var httpClient = new HttpClient())
             {
@@ -439,7 +439,7 @@ namespace KronisHue
             if (!CheckBridge())
                 return new Group[0];
 
-            string uri = $"http://{IP}/api/{Username}/groups";
+            string uri = $"{BaseApiUrl}/{Username}/groups";
 
             using (var httpClient = new HttpClient())
             {
@@ -461,12 +461,6 @@ namespace KronisHue
 
         public async Task<List<GroupLightList>> GetGroupLightListAsync()
         {
-            /*Task<Light[]> lightTask = GetLightsAsync();
-            Task<Group[]> groupsTask = GetGroupsAsync();
-            await Task.WhenAll(lightTask, groupsTask);
-            var lights = lightTask.Result;
-            var groups = groupsTask.Result;*/
-
             var lights = await GetLightsAsync();
             var groups = await GetGroupsAsync();
 
@@ -499,7 +493,7 @@ namespace KronisHue
         {
             CheckBridgeAndThrow();
 
-            string uri = $"http://{IP}/api/{Username}/lights/{light.Id}/state";
+            string uri = $"{BaseApiUrl}/{Username}/lights/{light.Id}/state";
             string lightprefix = $"/lights/{light.Id}/state/";
 
             using (var httpClient = new HttpClient())
@@ -571,7 +565,7 @@ namespace KronisHue
         {
             CheckBridgeAndThrow();
 
-            string uri = $"http://{IP}/api/{Username}/groups/{group.Id}/action";
+            string uri = $"{BaseApiUrl}/{Username}/groups/{group.Id}/action";
             string prefix = $"/groups/{group.Id}/action/";
 
             using (var httpClient = new HttpClient())
@@ -614,7 +608,7 @@ namespace KronisHue
 
         private void CheckBridgeAndThrow()
         {
-            if (IP == null)
+            if (BaseApiUrl == null)
                 throw new Exception("Bridge not set");
             if (Username == null)
                 throw new Exception("Username not set");
@@ -622,7 +616,7 @@ namespace KronisHue
 
         private bool CheckBridge()
         {
-            if (IP == null)
+            if (BaseApiUrl == null)
                 return false;
             if (Username == null)
                 return false;

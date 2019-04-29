@@ -181,5 +181,27 @@ export class KronisHue {
             });
         });
     }
+    getLights() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return fetch("/api/kronishue/lights", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    token: this.data.access_token,
+                    username: this.data.username
+                })
+            }).then((response) => {
+                if (response.ok) {
+                    return response.json().then((data) => {
+                        return data;
+                    });
+                }
+            }).catch(() => {
+                return null;
+            });
+        });
+    }
 }
 //# sourceMappingURL=kronishue.js.map

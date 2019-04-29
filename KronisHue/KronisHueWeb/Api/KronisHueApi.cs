@@ -167,6 +167,26 @@ namespace KronisHueWeb
 
             }
         }
+
+        [HttpPost("lights")]
+        public async Task<IActionResult> GetLights([FromBody] ApiInput input)
+        {
+            using (HttpClient c = new HttpClient())
+            {
+                c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", input.Token);
+                var response = await c.GetAsync($"https://api.meethue.com/bridge/{input.UserName}/lights");
+                return await Forward(response);
+            }
+        }
+
+        private async static Task<IActionResult> Forward(HttpResponseMessage response)
+        {
+            var res = new ContentResult();
+            res.StatusCode = (int)response.StatusCode;
+            res.ContentType = response.Headers.GetValues("Content-type").FirstOrDefault();
+            res.Content = await response.Content.ReadAsStringAsync();
+            return res;
+        }
     }
 
 
@@ -202,6 +222,15 @@ namespace KronisHueWeb
 
         [JsonProperty("devicetype")]
         public string DeviceType { get; set; }
+    }
+
+    public class ApiInput
+    {
+        [JsonProperty("token")]
+        public string Token { get; set; }
+
+        [JsonProperty("username")]
+        public string UserName { get; set; }
     }
 
     public class TokenResult

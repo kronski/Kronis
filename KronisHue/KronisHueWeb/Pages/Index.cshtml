@@ -7,26 +7,33 @@
 @section Scripts
 {
     <script src="~/js/index.js" type="module" asp-append-version="true"></script>
-}
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
-
-<div class="container">
-    <template id="cardTemplate">
+    <script id="cardTemplate" type="text/x-handlebars-template">
         <div class="col-md-4">
             <div class="card" style="width: 18rem;">
-                <img src="..." class="card-img-top" alt="...">
                 <div class="card-body">
-                    <h5 class="card-title">Card title</h5>
-                    <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                    <a href="#" class="btn btn-primary">Go somewhere</a>
+                    <div>
+                        <h5 class="card-title d-inline">{{ name }}</h5>
+                        <div class="material-switch pull-right float-right">
+                            <input id="lightSwitchOnOff{{ id }}" {{#if state.on}} checked{{/if}} type="checkbox" />
+                            <label for="lightSwitchOnOff{{ id }}" class="label-default"></label>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-light border-secondary">Properties</button>
                 </div>
             </div>
         </div>
-    </template>
+    </script>
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome to KronisHue</h1>
+    <p>The best way to slå på lyset. Soon&trade;</a>.</p>
+</div>
+
+<button type="button" class="btn btn-primary" id="refreshButton">Refresh state</button>
+
+<div class="container">
     <div class="row" id="cardRows">
     </div>
 </div>

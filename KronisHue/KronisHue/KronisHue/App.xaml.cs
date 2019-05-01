@@ -89,11 +89,11 @@ namespace KronisHue
             {
                 BridgeApiClient.Current.Bridges.Add(bridge);
 
-                if(BridgeApiClient.Current.IP == null)
+                if(BridgeApiClient.Current.BaseApiUrl == null)
                 {
                     Properties["LastIP"] = bridge;
 
-                    BridgeApiClient.Current.IP = bridge;
+                    BridgeApiClient.Current.BaseApiUrl = "http://"+bridge+"/api";
                     OnBridgeFound(this,bridge);
                 }
             }

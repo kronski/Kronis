@@ -23,6 +23,7 @@
 
 
   <ItemGroup>
+    <Folder Include="Scripts\Types\" />
     <Folder Include="wwwroot\js\" />
   </ItemGroup>
 

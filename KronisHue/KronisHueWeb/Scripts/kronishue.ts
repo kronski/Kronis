@@ -14,9 +14,77 @@
     username: string|null;
 };
 
+class LightState {
+    "on": boolean | null;
+    "bri": number | null;
+    "hue": number | null;
+    "sat": number | null;
+    "effect": string | null;
+    "xy": Array<number> | null;
+    "ct": number | null;
+    "alert": string | null;
+    "colormode": string | null;
+    "mode": string | null;
+    "reachable": boolean | null;
+}
+
+class LightSWUpdate {
+    "state": string | null;
+    "lastinstall": Date | null;
+}
+
+class LightCapabilitiesControlCT {
+    "min": number;
+    "max": number;
+}
+
+class LightCapabilitiesControl {
+    "mindimlevel": number;
+    "maxlumen": number;
+    "colorgamuttype": string;
+    "colorgamut": Array<Array<number>>;
+    "ct": LightCapabilitiesControlCT;
+}
+
+class LightCapabilitiesStreaming {
+    "renderer": boolean;
+    "proxy": boolean;
+}
+
+class LightCapabilities {
+    "certified": boolean | null;
+    "control": LightCapabilitiesControl | null;
+    "streaming": LightCapabilitiesStreaming;
+}
+class LightConfig {
+    "archetype": string;
+    "function": string;
+    "direction": string;
+}
+
+class Light {
+    id: string;
+    state: LightState | null;
+    swupdate: LightSWUpdate | null;
+    type: string | null;
+    name: string | null;
+    modelid: string | null;
+    manufacturername: string | null;
+    productname: string | null;
+    capabilities: LightCapabilities | null;
+    config: LightConfig | null;
+    uniqueid: string | null;
+    swversion: string | null;
+}
+
+class Lights {
+    [id: string]: Light;
+}
+
 export class KronisHue {
 
     data: KronisHueData;
+    lights: Lights; 
     useLocalstorage: boolean;
 
     constructor(useLocalstorage: boolean = true) {
@@ -28,23 +96,33 @@ export class KronisHue {
     loadFromLocalStorage() {
         if (!this.useLocalstorage)
             return;
-
-        let jsonstr = window.localStorage.getItem("kronisHueData");
-        if (jsonstr) {
-            this.data = JSON.parse(jsonstr);
-        }
-        else
-            this.data = new KronisHueData();
-
+        this.loadDataFromLocalStorage();
+        this.loadLightsFromLocalStorage();
     }
 
-    saveToLocalStorage() {
+    loadDataFromLocalStorage() {
+        let jsonstr = window.localStorage.getItem("kronisHueData");
+        this.data = (jsonstr) ? JSON.parse(jsonstr) : new KronisHueData();
+    }
+
+    loadLightsFromLocalStorage() {
+        let jsonstr = window.localStorage.getItem("kronisHueLights");
+        this.lights = (jsonstr) ? JSON.parse(jsonstr) : null;
+    }
+
+    saveDataToLocalStorage() {
         if (!this.useLocalstorage)
             return;
 
         var jsonstr = JSON.stringify(this.data);
-        let str = JSON.parse(jsonstr);
         window.localStorage.setItem("kronisHueData", jsonstr);
+    }
+
+    saveLightsToLocalStorage() {
+        if (!this.useLocalstorage)
+            return;
+        var jsonstr = JSON.stringify(this.lights);
+        window.localStorage.setItem("kronisHueLights", jsonstr);
     }
 
     getRandomStr(length: number): string {
@@ -62,7 +140,7 @@ export class KronisHue {
 
     getAuthLink() {
         this.data.state = this.getRandomStr(64);
-        this.saveToLocalStorage();
+        this.saveDataToLocalStorage();
 
         return fetch("/api/kronishue/appinfo", {
             method: "POST",
@@ -94,7 +172,7 @@ export class KronisHue {
         if (state == requeststate) {
             if (requestcode) {
                 this.data.code = requestcode;
-                this.saveToLocalStorage();
+                this.saveDataToLocalStorage();
                 return true;
             }
             return false;
@@ -114,12 +192,12 @@ export class KronisHue {
         }).then((response) => {
             return response.text().then((nonce) => {
                 this.data.nonce = nonce;
-                this.saveToLocalStorage();
+                this.saveDataToLocalStorage();
                 return this.data.nonce;
             });
         }).catch(() => {
             this.data.nonce = null;
-            this.saveToLocalStorage();
+            this.saveDataToLocalStorage();
             return this.data.nonce;
         });
     }
@@ -142,7 +220,7 @@ export class KronisHue {
                     this.data.refresh_token = data.refresh_token;
                     this.data.refresh_token_expires_in = data.refresh_token_expires_in;
                     this.data.token_type = data.token_type;
-                    this.saveToLocalStorage();
+                    this.saveDataToLocalStorage();
 
                     return data;
                 });
@@ -172,7 +250,7 @@ export class KronisHue {
                     this.data.refresh_token = data.refresh_token;
                     this.data.refresh_token_expires_in = data.refresh_token_expires_in;
                     this.data.token_type = data.token_type;
-                    this.saveToLocalStorage();
+                    this.saveDataToLocalStorage();
 
                     return data;
                 });
@@ -199,7 +277,7 @@ export class KronisHue {
             if (response.ok) {
                 return response.json().then((data) => {
                     this.data.username = data.username;
-                    this.saveToLocalStorage();
+                    this.saveDataToLocalStorage();
 
                     return data;
                 });
@@ -210,7 +288,11 @@ export class KronisHue {
         });
     }
 
-    async getLights() {
+
+    async getLights(refresh: boolean = false): Promise<Lights | null> {
+        if (!refresh && this.lights)
+            return this.lights;
+
         return fetch("/api/kronishue/lights", {
             method: "POST",
             headers: {
@@ -223,9 +305,18 @@ export class KronisHue {
         }).then((response) => {
             if (response.ok) {
                 return response.json().then((data) => {
+                    this.lights = data;
+
+                    for (let id in this.lights) {
+                        this.lights[id].id = id;
+                    }
+
+                    this.saveLightsToLocalStorage();
                     return data;
                 });
             }
+            else
+                return null;
         }).catch(() => {
             return null;
         });

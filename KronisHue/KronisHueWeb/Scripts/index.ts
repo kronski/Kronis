@@ -1,20 +1,43 @@
 ﻿import { KronisHue } from "./kronishue.js";
-
+ 
 $(function () {
-    let hue = new KronisHue();
+    function refresh(refresh: boolean = false) {
+        if (!document)
+            return;
+        let templateelem = document.getElementById("cardTemplate");
+        if (!templateelem)
+            return;
 
-    /*if (hue.data.username && hue.data.access_token) {
-        hue.getLights().then((lights) => {
+        let source = templateelem.innerHTML;
+        var template = Handlebars.compile(source);
 
-        });
-    }*/
-    let template = this.querySelector("#cardTemplate");
-    let rows = this.getElementById("cardRows");
-    if (template && rows) {
-        for (let i = 0; i < 20; i++) {
-            let node = document.createElement("div");
-            rows.appendChild(node);
-            node.outerHTML = template.innerHTML;
+        let rows = document.getElementById("cardRows");
+        if (template && rows) {
+            while (rows.firstChild) {
+                rows.removeChild(rows.firstChild);
+            }
+
+            let hue = new KronisHue();
+            if (hue.data.username && hue.data.access_token) {
+                hue.getLights(refresh).then((lights) => {
+                    if (!template || !rows)
+                        return;
+                    for (let id in lights) {
+                        let node = document.createElement("div");
+                        rows.appendChild(node);
+                        let light = lights[id];
+                        node.outerHTML = template(light);
+                    }
+                });
+            }
         }
     }
+
+    $("#refreshButton").click(() => {
+        refresh(true);
+    });
+
+    refresh();
+
+    
 });

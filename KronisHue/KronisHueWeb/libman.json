@@ -3,7 +3,16 @@
   "defaultProvider": "cdnjs",
   "defaultDestination": "wwwroot/lib",
   "libraries": [
-    { "library": "twitter-bootstrap@4.3.1" },
-    { "library": "jquery@3.4.0", "destination": "wwwroot/lib/js" }
+    {
+      "library": "twitter-bootstrap@4.3.1" 
+    },
+    {
+      "library": "jquery@3.4.0",
+      "destination": "wwwroot/lib/js"
+    },
+    {
+      "library": "handlebars.js@4.1.2",
+      "destination": "wwwroot/lib/js"
+    }
   ]
 }

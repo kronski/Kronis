@@ -183,7 +183,7 @@ namespace KronisHueWeb
         {
             var res = new ContentResult();
             res.StatusCode = (int)response.StatusCode;
-            res.ContentType = response.Headers.GetValues("Content-type").FirstOrDefault();
+            res.ContentType = response.Content.Headers.GetValues("Content-Type").FirstOrDefault();
             res.Content = await response.Content.ReadAsStringAsync();
             return res;
         }

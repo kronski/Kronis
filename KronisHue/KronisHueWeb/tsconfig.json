@@ -6,7 +6,7 @@
     "target": "es6",
     "strictNullChecks": true,
     "outDir": "wwwroot/js",
-    "rootDir": "Scripts",
+    "rootDirs": [ "Scripts", "wwwroot" ],
     "sourceMap": true
   },
   "include": [

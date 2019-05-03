@@ -13,6 +13,10 @@
     {
       "library": "handlebars.js@4.1.2",
       "destination": "wwwroot/lib/js"
+    },
+    {
+      "library": "font-awesome@5.8.1",
+      "destination": "wwwroot/lib/fontawesome"
     }
   ]
 }

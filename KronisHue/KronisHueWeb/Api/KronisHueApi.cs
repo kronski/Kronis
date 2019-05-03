@@ -11,6 +11,7 @@ using System.Text;
 using System.Net;
 using System.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
+using KronisHue;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -171,10 +172,61 @@ namespace KronisHueWeb
         [HttpPost("lights")]
         public async Task<IActionResult> GetLights([FromBody] ApiInput input)
         {
+
             using (HttpClient c = new HttpClient())
             {
+                ApplyAuthentication(c,input);
+                var response = await c.GetAsync($"{input.ApiUrl}/lights");
+                return await Forward(response);
+            }
+        }
+
+        private static void ApplyAuthentication(HttpClient c, ApiInput input)
+        {
+            if(input.Token!=null)
                 c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", input.Token);
-                var response = await c.GetAsync($"https://api.meethue.com/bridge/{input.UserName}/lights");
+        }
+
+        [HttpPost("groups")]
+        public async Task<IActionResult> GetGroups([FromBody] ApiInput input)
+        {
+            using (HttpClient c = new HttpClient())
+            {
+                ApplyAuthentication(c, input);
+                var response = await c.GetAsync($"{input.ApiUrl}/groups");
+                return await Forward(response);
+            }
+        }
+
+        [HttpPost("locateHue")]
+        public async Task<IActionResult> LocateHue()
+        {
+            var t = await Task.WhenAll(
+                new Task<string[]>[]
+                {
+                    BridgeLocator.FindHueBridgeViaUpnp(device => 
+                    {
+                    }
+                    ,null),
+                    BridgeLocator.FindHueBridgeViaMeetHue()
+                }
+            );
+
+            HashSet<string> result = new HashSet<string>();
+            foreach (var x in t)
+                foreach (var s in x)
+                    if(!result.Contains(s))
+                        result.Add(s);
+            return Ok(result.ToArray());
+        }
+
+        [HttpPost("registerLocalHue")]
+        public async Task<IActionResult> RegisterLocalHue([FromBody] ApiInput input)
+        {
+            using (HttpClient c = new HttpClient())
+            {
+                // {"devicetype":"my_hue_app#iphone peter"}
+                var response = await c.PostAsJsonAsync(input.BaseUrl, new { devicetype = "KronisHueWeb" });
                 return await Forward(response);
             }
         }
@@ -231,6 +283,11 @@ namespace KronisHueWeb
 
         [JsonProperty("username")]
         public string UserName { get; set; }
+
+        [JsonProperty("baseUrl")]
+        public string BaseUrl { get; set; }
+
+        internal string ApiUrl => BaseUrl ?? $"https://api.meethue.com/bridge/{UserName}";
     }
 
     public class TokenResult

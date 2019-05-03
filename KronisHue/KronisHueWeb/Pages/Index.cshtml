@@ -6,34 +6,52 @@
 
 @section Scripts
 {
-    <script src="~/js/index.js" type="module" asp-append-version="true"></script>
+<script src="~/js/index.js" type="module" asp-append-version="true"></script>
 
-    <script id="cardTemplate" type="text/x-handlebars-template">
-        <div class="col-md-4">
-            <div class="card" style="width: 18rem;">
-                <div class="card-body">
-                    <div>
-                        <h5 class="card-title d-inline">{{ name }}</h5>
-                        <div class="material-switch pull-right float-right">
-                            <input id="lightSwitchOnOff{{ id }}" {{#if state.on}} checked{{/if}} type="checkbox" />
-                            <label for="lightSwitchOnOff{{ id }}" class="label-default"></label>
+<script id="groupTemplate" type="text/x-handlebars-template">
+    {{#each this}}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                {{ group.name }}
+            </div>
+            <div class="card-body group-lights">
+                <div class="container">
+                    <div class="row">
+                        {{#each lights}}
+                        <div class="col-4">
+                            <div class="card" style="width: 18rem;">
+                                <div class="card-header">
+                                    {{ name }}
+                                </div>
+                                <div class="card-body">
+                                    <div>
+                                        <div class="material-switch pull-right float-right">
+                                            <input id="lightSwitchOnOff{{ id }}" {{#if state.on}} checked{{/if}} type="checkbox" />
+                                            <label for="lightSwitchOnOff{{ id }}" class="label-default"></label>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-light border-secondary">Properties</button>
+                                </div>
+                            </div>
                         </div>
+                        {{/each}}
                     </div>
-                    <button type="button" class="btn btn-light border-secondary">Properties</button>
                 </div>
             </div>
         </div>
-    </script>
+    </div>
+    {{/each}}
+</script>
 }
 
-<div class="text-center">
+<div class="jumbotron text-center">
     <h1 class="display-4">Welcome to KronisHue</h1>
-    <p>The best way to slå på lyset. Soon&trade;</a>.</p>
+    <p>The best way to slå på lyset. Soon&trade;.</p>
+    <button type="button" class="btn btn-primary" id="refreshButton">Refresh state</button>
 </div>
 
-<button type="button" class="btn btn-primary" id="refreshButton">Refresh state</button>
-
-<div class="container">
+<div class="container-fluid">
     <div class="row" id="cardRows">
     </div>
 </div>

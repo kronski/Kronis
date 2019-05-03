@@ -1,29 +1,41 @@
 import { KronisHue } from "./kronishue.js";
 $(function () {
+    function genTemplate(name) {
+        let templateelem = document.getElementById(name);
+        if (!templateelem)
+            return null;
+        let source = templateelem.innerHTML;
+        var template = Handlebars.compile(source);
+        return template;
+    }
     function refresh(refresh = false) {
         if (!document)
             return;
-        let templateelem = document.getElementById("cardTemplate");
-        if (!templateelem)
-            return;
-        let source = templateelem.innerHTML;
-        var template = Handlebars.compile(source);
+        let groupstemplate = genTemplate("groupTemplate");
         let rows = document.getElementById("cardRows");
-        if (template && rows) {
+        if (rows) {
             while (rows.firstChild) {
                 rows.removeChild(rows.firstChild);
             }
             let hue = new KronisHue();
-            if (hue.data.username && hue.data.access_token) {
-                hue.getLights(refresh).then((lights) => {
-                    if (!template || !rows)
+            if (hue.canRefresh()) {
+                Promise.all([
+                    hue.getLights(refresh),
+                    hue.getGroups(refresh)
+                ]).then(([lights, groups]) => {
+                    if (!groupstemplate || !rows || !lights || !groups)
                         return;
-                    for (let id in lights) {
-                        let node = document.createElement("div");
-                        rows.appendChild(node);
-                        let light = lights[id];
-                        node.outerHTML = template(light);
-                    }
+                    let g = Object.keys(groups).map((key) => {
+                        return {
+                            group: groups[key],
+                            lights: groups[key].lights.map((id) => {
+                                return lights[id];
+                            })
+                        };
+                    });
+                    let node = document.createElement("div");
+                    rows.appendChild(node);
+                    node.outerHTML = groupstemplate(g);
                 });
             }
         }

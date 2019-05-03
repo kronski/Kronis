@@ -44,18 +44,19 @@ namespace KronisHue
         {
             var finder = new SsdpRadar.FinderService(1, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10), cancelSource?.Token);
 
+            var FoundItems = new List<string>();
             var devices = await finder.FindDevicesAsync(
                 device =>
                 {
                     if(device?.Info?.FriendlyName.StartsWith("Philips hue") == true)
                     {
-                        found(device.RemoteEndPoint.ToString());
+                        var ip = device.RemoteEndPoint.ToString();
+                        FoundItems.Add(ip);
+                        found(ip);
                     }
                 }
                 );
-            return devices.Select(
-                device => device.RemoteEndPoint.ToString()
-            ).ToArray();
+            return FoundItems.ToArray();
         }
 
     }

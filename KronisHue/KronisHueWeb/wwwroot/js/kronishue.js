@@ -7,6 +7,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 class KronisHueData {
+    constructor() {
+        this.baseUrl = "";
+        this.autoRefreshState = false;
+    }
 }
 ;
 class LightState {
@@ -27,36 +31,42 @@ class Light {
 }
 class Lights {
 }
+class GroupAction {
+}
+class Group {
+}
+class Groups {
+}
+const localStorageDataKey = "kronisHueData", localStorageLightsKey = "kronisHueLights", localStorageGroupsKey = "kronisHueGroups";
 export class KronisHue {
     constructor(useLocalstorage = true) {
         this.useLocalstorage = useLocalstorage;
         this.loadFromLocalStorage();
     }
+    canRefresh() {
+        if ((this.data.access_token && this.data.username) || this.data.baseUrl)
+            return true;
+        return false;
+    }
     loadFromLocalStorage() {
         if (!this.useLocalstorage)
             return;
-        this.loadDataFromLocalStorage();
-        this.loadLightsFromLocalStorage();
+        this.data = this.loadAnyFromLocalStorage(localStorageDataKey) || new KronisHueData();
+        this.lights = this.loadAnyFromLocalStorage(localStorageLightsKey) || new Lights();
+        this.groups = this.loadAnyFromLocalStorage(localStorageGroupsKey) || new Groups();
     }
-    loadDataFromLocalStorage() {
-        let jsonstr = window.localStorage.getItem("kronisHueData");
-        this.data = (jsonstr) ? JSON.parse(jsonstr) : new KronisHueData();
+    loadAnyFromLocalStorage(key) {
+        let jsonstr = window.localStorage.getItem(key);
+        return (jsonstr) ? JSON.parse(jsonstr) : null;
     }
-    loadLightsFromLocalStorage() {
-        let jsonstr = window.localStorage.getItem("kronisHueLights");
-        this.lights = (jsonstr) ? JSON.parse(jsonstr) : null;
+    saveSettings() {
+        this.saveAnyToLocalStorage(localStorageDataKey, this.data);
     }
-    saveDataToLocalStorage() {
+    saveAnyToLocalStorage(key, data) {
         if (!this.useLocalstorage)
             return;
-        var jsonstr = JSON.stringify(this.data);
-        window.localStorage.setItem("kronisHueData", jsonstr);
-    }
-    saveLightsToLocalStorage() {
-        if (!this.useLocalstorage)
-            return;
-        var jsonstr = JSON.stringify(this.lights);
-        window.localStorage.setItem("kronisHueLights", jsonstr);
+        var jsonstr = JSON.stringify(data);
+        window.localStorage.setItem(key, jsonstr);
     }
     getRandomStr(length) {
         var random_num = new Uint8Array(length);
@@ -69,7 +79,7 @@ export class KronisHue {
     }
     getAuthLink() {
         this.data.state = this.getRandomStr(64);
-        this.saveDataToLocalStorage();
+        this.saveAnyToLocalStorage(localStorageDataKey, this.data);
         return fetch("/api/kronishue/appinfo", {
             method: "POST",
             headers: {
@@ -97,7 +107,7 @@ export class KronisHue {
         if (state == requeststate) {
             if (requestcode) {
                 this.data.code = requestcode;
-                this.saveDataToLocalStorage();
+                this.saveAnyToLocalStorage(localStorageDataKey, this.data);
                 return true;
             }
             return false;
@@ -117,12 +127,12 @@ export class KronisHue {
             }).then((response) => {
                 return response.text().then((nonce) => {
                     this.data.nonce = nonce;
-                    this.saveDataToLocalStorage();
+                    this.saveAnyToLocalStorage(localStorageDataKey, this.data);
                     return this.data.nonce;
                 });
             }).catch(() => {
                 this.data.nonce = null;
-                this.saveDataToLocalStorage();
+                this.saveAnyToLocalStorage(localStorageDataKey, this.data);
                 return this.data.nonce;
             });
         });
@@ -146,7 +156,7 @@ export class KronisHue {
                         this.data.refresh_token = data.refresh_token;
                         this.data.refresh_token_expires_in = data.refresh_token_expires_in;
                         this.data.token_type = data.token_type;
-                        this.saveDataToLocalStorage();
+                        this.saveAnyToLocalStorage(localStorageDataKey, this.data);
                         return data;
                     });
                 }
@@ -175,7 +185,7 @@ export class KronisHue {
                         this.data.refresh_token = data.refresh_token;
                         this.data.refresh_token_expires_in = data.refresh_token_expires_in;
                         this.data.token_type = data.token_type;
-                        this.saveDataToLocalStorage();
+                        this.saveAnyToLocalStorage(localStorageDataKey, this.data);
                         return data;
                     });
                 }
@@ -199,7 +209,7 @@ export class KronisHue {
                 if (response.ok) {
                     return response.json().then((data) => {
                         this.data.username = data.username;
-                        this.saveDataToLocalStorage();
+                        this.saveAnyToLocalStorage(localStorageDataKey, this.data);
                         return data;
                     });
                 }
@@ -208,19 +218,84 @@ export class KronisHue {
             });
         });
     }
+    locateHue() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return fetch("/api/kronishue/locateHue", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({})
+            }).then((response) => {
+                if (response.ok) {
+                    return response.json().then((data) => {
+                        if (data) {
+                            let items = data;
+                            if (items.length > 0) {
+                                let ip = items[0];
+                                this.data.baseUrl = `http://${ip}/api`;
+                                this.saveAnyToLocalStorage(localStorageDataKey, this.data);
+                                return this.data.baseUrl;
+                            }
+                        }
+                        return null;
+                    });
+                }
+                else
+                    return null;
+            }).catch(() => {
+                return null;
+            });
+        });
+    }
+    registerLocalHue() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return fetch("/api/kronishue/registerLocalHue", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(this.getApiInput())
+            }).then((response) => {
+                if (!response.ok)
+                    return null;
+                return response.json().then((data) => {
+                    if (!data)
+                        return false;
+                    if (data.length == 0)
+                        return false;
+                    if (!data[0])
+                        return false;
+                    if (!data[0].success)
+                        return false;
+                    if (!data[0].success.username)
+                        return false;
+                    this.data.baseUrl += "/" + data[0].success.username;
+                    return true;
+                });
+            }).catch(() => {
+                return null;
+            });
+        });
+    }
+    getApiInput() {
+        let hasbaseurl = this.data.baseUrl.length == 0;
+        return {
+            token: hasbaseurl ? this.data.access_token : null,
+            username: hasbaseurl ? this.data.username : null,
+            baseUrl: this.data.baseUrl
+        };
+    }
     getLights(refresh = false) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (!refresh && this.lights)
+            if (!refresh && this.lights && !this.data.autoRefreshState)
                 return this.lights;
             return fetch("/api/kronishue/lights", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({
-                    token: this.data.access_token,
-                    username: this.data.username
-                })
+                body: JSON.stringify(this.getApiInput())
             }).then((response) => {
                 if (response.ok) {
                     return response.json().then((data) => {
@@ -228,7 +303,35 @@ export class KronisHue {
                         for (let id in this.lights) {
                             this.lights[id].id = id;
                         }
-                        this.saveLightsToLocalStorage();
+                        this.saveAnyToLocalStorage(localStorageLightsKey, this.lights);
+                        return data;
+                    });
+                }
+                else
+                    return null;
+            }).catch(() => {
+                return null;
+            });
+        });
+    }
+    getGroups(refresh = false) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!refresh && this.lights && !this.data.autoRefreshState)
+                return this.groups;
+            return fetch("/api/kronishue/groups", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(this.getApiInput())
+            }).then((response) => {
+                if (response.ok) {
+                    return response.json().then((data) => {
+                        this.groups = data;
+                        for (let id in this.groups) {
+                            this.groups[id].id = id;
+                        }
+                        this.saveAnyToLocalStorage(localStorageGroupsKey, this.groups);
                         return data;
                     });
                 }

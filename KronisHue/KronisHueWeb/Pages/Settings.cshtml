@@ -15,7 +15,7 @@
 <label for="codeLabel">Authenticate site for hue</label>
 <div class="input-group mb-3">
     <input id="codeLabel" type="text" class="form-control">
-    <div class="input-group-prepend">
+    <div class="input-group-append">
         <button class="btn btn-outline-secondary" type="button" id="authButton">Visit hue to authenticate</button>
     </div>
 </div>
@@ -23,7 +23,7 @@
 <label for="nonceLabel">Nonce</label>
 <div class="input-group mb-3">
     <input id="nonceLabel" type="text" class="form-control">
-    <div class="input-group-prepend">
+    <div class="input-group-append">
         <button class="btn btn-outline-secondary" type="button" id="nonceButton">Get nonce</button>
     </div>
 </div>
@@ -31,7 +31,7 @@
 <label for="accessToken">Access token</label>
 <div class="input-group mb-3">
     <input id="accessToken" type="text" class="form-control">
-    <div class="input-group-prepend">
+    <div class="input-group-append">
         <button class="btn btn-outline-secondary" type="button" id="tokenButton">Get token</button>
     </div>
 </div>
@@ -44,7 +44,7 @@
 <label for="rWefreshToken">Refresh token</label>
 <div class="input-group mb-3">
     <input id="refreshToken" type="text" class="form-control">
-    <div class="input-group-prepend">
+    <div class="input-group-append">
         <button class="btn btn-outline-secondary" type="button" id="refreshTokenButton">Refresh token</button>
     </div>
 </div>
@@ -57,7 +57,24 @@
 <label for="username">Username</label>
 <div class="input-group mb-3">
     <input id="username" type="text" class="form-control">
-    <div class="input-group-prepend">
+    <div class="input-group-append">
         <button class="btn btn-outline-secondary" type="button" id="usernameButton">Get username</button>
     </div>
+</div>
+
+<label for="username">Base url</label>
+<div class="input-group mb-3">
+    <input id="baseUrl" type="text" class="form-control">
+    <div class="input-group-append"><i class="fa" id="baseUrlIcon"></i></div>
+    <div class="input-group-append">
+        <button class="btn btn-outline-secondary" type="button" id="locateHueButton">Locate local hue</button>
+    </div>
+    <div class="input-group-append">
+        <button class="btn btn-outline-secondary" type="button" id="registerLocalHueButton">Register on local hue</button>
+    </div>
+</div>
+
+<div class="input-group mb-3">
+    <label for="username">Auto refresh state</label>
+    <input id="autoRefreshState" type="checkbox" class="form-control">
 </div>

@@ -9,6 +9,8 @@ $(function () {
         $("#refreshToken").val(hue.data.refresh_token || "Not set");
         $("#refreshTokenExpires").val(hue.data.refresh_token_expires_in || "Not set");
         $("#username").val(hue.data.username || "Not set");
+        $("#baseUrl").val(hue.data.baseUrl);
+        $("#autoRefreshState").prop('checked', hue.data.autoRefreshState);
     }
     $("#authButton").click(function () {
         hue.getAuthLink().then((url) => {
@@ -35,6 +37,26 @@ $(function () {
     });
     $("#usernameButton").click(function () {
         hue.setDeviceType().then((data) => {
+            refreshSettings();
+        });
+    });
+    $("#autoRefreshState").click(function () {
+        hue.data.autoRefreshState = $("#autoRefreshState").prop('checked');
+        hue.saveSettings();
+    });
+    $("#baseUrl").click(function () {
+        hue.data.baseUrl = $("#baseUrl").val();
+        hue.saveSettings();
+    });
+    $("#locateHueButton").click(function () {
+        hue.locateHue().then(() => {
+            refreshSettings();
+        });
+    });
+    $("#registerLocalHueButton").click(function () {
+        hue.registerLocalHue().then((registered) => {
+            $("#baseUrlIcon").removeClass(registered ? 'fa-times' : 'fa-check');
+            $("#baseUrlIcon").addClass(registered ? 'fa-check' : 'fa-times');
             refreshSettings();
         });
     });

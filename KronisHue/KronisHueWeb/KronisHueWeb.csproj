@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Scripts\samewidth.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="Scripts\authgranted.ts" />
     <Content Include="Scripts\index.ts" />
     <Content Include="Scripts\kronishue.ts" />
@@ -30,6 +34,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\KronisHueLib\KronisHueLib.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <TypeScriptCompile Include="Scripts\samewidth.ts" />
   </ItemGroup>
 
 </Project>

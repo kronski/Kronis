@@ -10,6 +10,7 @@ $(function () {
         $("#refreshTokenExpires").val(hue.data.refresh_token_expires_in || "Not set");
         $("#username").val(hue.data.username || "Not set");
         $("#baseUrl").val(hue.data.baseUrl);
+        $("#localusername").val(hue.data.localusername);
         $("#autoRefreshState").prop('checked', hue.data.autoRefreshState);
     }
     $("#authButton").click(function () {
@@ -54,9 +55,15 @@ $(function () {
         });
     });
     $("#registerLocalHueButton").click(function () {
-        hue.registerLocalHue().then((registered) => {
-            $("#baseUrlIcon").removeClass(registered ? 'fa-times' : 'fa-check');
-            $("#baseUrlIcon").addClass(registered ? 'fa-check' : 'fa-times');
+        hue.registerLocalHue().then(() => {
+            $("#baseUrlIcon").removeClass('fa-times');
+            $("#baseUrlIcon").addClass('fa-check');
+            $("#localusername-feedback").hide();
+            refreshSettings();
+        }).catch((msg) => {
+            $("#baseUrlIcon").removeClass('fa-check');
+            $("#baseUrlIcon").addClass('fa-times');
+            $("#localusername-feedback").text(msg).show();
             refreshSettings();
         });
     });

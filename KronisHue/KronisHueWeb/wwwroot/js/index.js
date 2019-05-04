@@ -1,5 +1,7 @@
-import { KronisHue } from "./kronishue.js";
+import { KronisHue, LightState, GroupAction } from "./kronishue.js";
+import "./samewidth.js";
 $(function () {
+    let hue = new KronisHue();
     function genTemplate(name) {
         let templateelem = document.getElementById(name);
         if (!templateelem)
@@ -12,18 +14,17 @@ $(function () {
         if (!document)
             return;
         let groupstemplate = genTemplate("groupTemplate");
-        let rows = document.getElementById("cardRows");
-        if (rows) {
-            while (rows.firstChild) {
-                rows.removeChild(rows.firstChild);
+        let lightgroupselem = document.getElementById("lightgroups");
+        if (lightgroupselem) {
+            while (lightgroupselem.firstChild) {
+                lightgroupselem.removeChild(lightgroupselem.firstChild);
             }
-            let hue = new KronisHue();
             if (hue.canRefresh()) {
                 Promise.all([
                     hue.getLights(refresh),
                     hue.getGroups(refresh)
                 ]).then(([lights, groups]) => {
-                    if (!groupstemplate || !rows || !lights || !groups)
+                    if (!groupstemplate || !lightgroupselem || !lights || !groups)
                         return;
                     let g = Object.keys(groups).map((key) => {
                         return {
@@ -34,14 +35,38 @@ $(function () {
                         };
                     });
                     let node = document.createElement("div");
-                    rows.appendChild(node);
+                    lightgroupselem.appendChild(node);
                     node.outerHTML = groupstemplate(g);
+                    $(".same-width-1").sameWidth();
                 });
             }
         }
     }
     $("#refreshButton").click(() => {
         refresh(true);
+    });
+    $(document).on("change", function (event) {
+        if (!event)
+            return;
+        let source = $(event.target);
+        if (source.hasClass("lightswitch")) {
+            let id = source.attr("data-id");
+            if (!id)
+                return;
+            let checked = source.is(':checked');
+            let state = new LightState();
+            state.on = checked;
+            hue.setLightState(parseInt(id), state);
+        }
+        else if (source.hasClass("groupswitch")) {
+            let id = source.attr("data-id");
+            if (!id)
+                return;
+            let checked = source.is(':checked');
+            let action = new GroupAction();
+            action.on = checked;
+            hue.setGroupAction(parseInt(id), action);
+        }
     });
     refresh();
 });

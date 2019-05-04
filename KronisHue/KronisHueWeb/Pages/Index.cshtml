@@ -9,30 +9,34 @@
 <script src="~/js/index.js" type="module" asp-append-version="true"></script>
 
 <script id="groupTemplate" type="text/x-handlebars-template">
-    {{#each this}}
-    <div class="col-12">
+    <div class="accordion" id="accordionExample">
+        {{#each this}}
         <div class="card">
-            <div class="card-header">
-                {{ group.name }}
+            <div class="card-header" id="headingOne">
+                <button class="btn btn-info same-width-1" type="button" data-toggle="collapse" data-target="#collapse{{ group.id }}" aria-expanded="false" aria-controls="collapse{{ group.id }}">
+                    {{ group.name }}
+                </button>
+                <div class="material-switch pull-right float-right">
+                    <input class="groupswitch" id="groupSwitchOnOff{{ group.id }}" data-id="{{ group.id }}" {{#if group.action.on}}checked{{/if}} type="checkbox" />
+                    <label for="groupSwitchOnOff{{ group.id }}" class="label-default"></label>
+                </div>
+
             </div>
-            <div class="card-body group-lights">
-                <div class="container">
-                    <div class="row">
+
+            <div id="collapse{{ group.id }}" class="collapse hide" aria-labelledby="headingOne" data-parent="#accordionExample">
+                <div class="card-body">
+                    <div class="card-columns">
                         {{#each lights}}
-                        <div class="col-4">
-                            <div class="card" style="width: 18rem;">
-                                <div class="card-header">
-                                    {{ name }}
+                        <div class="card" style="width: 18rem;">
+                            <div class="card-header">
+                                {{ name }}
+                            </div>
+                            <div class="card-body">
+                                <div class="material-switch pull-right float-right">
+                                    <input class="lightswitch" id="lightSwitchOnOff{{ id }}" data-id="{{ id }}" {{#if state.on}} checked{{/if}} type="checkbox" />
+                                    <label for="lightSwitchOnOff{{ id }}" class="label-default"></label>
                                 </div>
-                                <div class="card-body">
-                                    <div>
-                                        <div class="material-switch pull-right float-right">
-                                            <input id="lightSwitchOnOff{{ id }}" {{#if state.on}} checked{{/if}} type="checkbox" />
-                                            <label for="lightSwitchOnOff{{ id }}" class="label-default"></label>
-                                        </div>
-                                    </div>
-                                    <button type="button" class="btn btn-light border-secondary">Properties</button>
-                                </div>
+                                <button type="button" class="btn btn-light border-secondary">Properties</button>
                             </div>
                         </div>
                         {{/each}}
@@ -40,8 +44,8 @@
                 </div>
             </div>
         </div>
+        {{/each}}
     </div>
-    {{/each}}
 </script>
 }
 
@@ -51,7 +55,5 @@
     <button type="button" class="btn btn-primary" id="refreshButton">Refresh state</button>
 </div>
 
-<div class="container-fluid">
-    <div class="row" id="cardRows">
-    </div>
+<div id="lightgroups">
 </div>

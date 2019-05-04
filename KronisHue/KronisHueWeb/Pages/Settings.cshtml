@@ -11,6 +11,7 @@
 
 <h1>Settings</h1>
 
+<h2>Remote access</h2>
 
 <label for="codeLabel">Authenticate site for hue</label>
 <div class="input-group mb-3">
@@ -62,17 +63,27 @@
     </div>
 </div>
 
+<h2>Local access</h2>
+
 <label for="username">Base url</label>
 <div class="input-group mb-3">
     <input id="baseUrl" type="text" class="form-control">
-    <div class="input-group-append"><i class="fa" id="baseUrlIcon"></i></div>
     <div class="input-group-append">
         <button class="btn btn-outline-secondary" type="button" id="locateHueButton">Locate local hue</button>
     </div>
+</div>
+
+<label for="username">Username</label>
+<div class="input-group mb-3">
+    <input id="localusername" type="text" class="form-control">
+
+    <div class="input-group-append"><i class="input-group-text fa align-middle" id="baseUrlIcon"></i></div>
     <div class="input-group-append">
         <button class="btn btn-outline-secondary" type="button" id="registerLocalHueButton">Register on local hue</button>
     </div>
+    <div class="invalid-feedback" id="localusername-feedback" />
 </div>
+
 
 <div class="input-group mb-3">
     <label for="username">Auto refresh state</label>

@@ -42,7 +42,7 @@ namespace KronisHue
 
         public static async Task<string[]> FindHueBridgeViaUpnp(Action<string> found, CancellationTokenSource cancelSource)
         {
-            var finder = new SsdpRadar.FinderService(1, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10), cancelSource?.Token);
+            var finder = new SsdpRadar.FinderService(1, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(2), cancelSource?.Token);
 
             var FoundItems = new List<string>();
             var devices = await finder.FindDevicesAsync(
@@ -90,29 +90,29 @@ namespace KronisHue
         private bool? reachable;
 
         [BindingControl(ControlType = typeof(Switch))]
-        [JsonProperty(PropertyName = "on")] //: false,
+        [JsonProperty(PropertyName = "on", NullValueHandling = NullValueHandling.Ignore)] //: false,
         public bool? On { get => on; set { if (value != on) { on = value; OnPropertyChanged(); } } }
         [BindingControl(ControlType = typeof(Slider),Max = 255, Min = 0)]
-        [JsonProperty(PropertyName = "bri")] //: 1,
+        [JsonProperty(PropertyName = "bri", NullValueHandling = NullValueHandling.Ignore)] //: 1,
         public long? Bri { get => bri; set { if (value != bri) { bri = value; OnPropertyChanged(); } } }
         [BindingControl(ControlType = typeof(Slider), Max = 65535, Min = 0)]
-        [JsonProperty(PropertyName = "hue")] //: 33761,
+        [JsonProperty(PropertyName = "hue", NullValueHandling = NullValueHandling.Ignore)] //: 33761,
         public long? Hue { get => hue; set { if (value != hue) { hue = value; OnPropertyChanged(); } } }
-        [JsonProperty(PropertyName = "sat")] //: 254,
+        [JsonProperty(PropertyName = "sat", NullValueHandling = NullValueHandling.Ignore)] //: 254,
         public byte? Sat { get => sat; set { if (value != sat) { sat = value; OnPropertyChanged(); } } }
-        [JsonProperty(PropertyName = "effect")] //: "none",
+        [JsonProperty(PropertyName = "effect", NullValueHandling = NullValueHandling.Ignore)] //: "none",
         public string Effect { get => effect; set { if (value != effect) { effect = value; OnPropertyChanged(); } } }
-        [JsonProperty(PropertyName = "xy")] //: [
+        [JsonProperty(PropertyName = "xy", NullValueHandling = NullValueHandling.Ignore)] //: [
         public float[] XY { get => xy; set { if (value != xy) { xy = value; OnPropertyChanged(); } } }
-        [JsonProperty(PropertyName = "ct")] //: 159,
+        [JsonProperty(PropertyName = "ct", NullValueHandling = NullValueHandling.Ignore)] //: 159,
         public ushort? CT { get => ct; set { if (value != ct) { ct = value; OnPropertyChanged(); } } }
-        [JsonProperty(PropertyName = "alert")] //: "none",
+        [JsonProperty(PropertyName = "alert", NullValueHandling = NullValueHandling.Ignore)] //: "none",
         public string Alert { get => alert; set { if (value != alert) { alert = value; OnPropertyChanged(); } } }
-        [JsonProperty(PropertyName = "colormode")] //: "xy",
+        [JsonProperty(PropertyName = "colormode", NullValueHandling = NullValueHandling.Ignore)] //: "xy",
         public string ColorMode { get => colormode; set { if (value != colormode) { colormode = value; OnPropertyChanged(); } } }
-        [JsonProperty(PropertyName = "mode")] //: "homeautomation",
+        [JsonProperty(PropertyName = "mode", NullValueHandling = NullValueHandling.Ignore)] //: "homeautomation",
         public string Mode { get => mode; set { if (value != mode) { mode = value; OnPropertyChanged(); } } }
-        [JsonProperty(PropertyName = "reachable")] //: true
+        [JsonProperty(PropertyName = "reachable", NullValueHandling = NullValueHandling.Ignore)] //: true
         public bool? Reachable { get => reachable; set { if (value != reachable) { reachable = value; OnPropertyChanged(); } } }
     }
 
@@ -267,35 +267,35 @@ namespace KronisHue
         private float? xy_inc;
         private string scene;
 
-        [JsonProperty(PropertyName = "on")] //: false,
+        [JsonProperty(PropertyName = "on",NullValueHandling = NullValueHandling.Ignore)] //: false,
         public bool? On { get => on; set { if (value != on) { on = value; OnPropertyChanged(); } } }
-        [JsonProperty(PropertyName = "bri")] //: 1,
+        [JsonProperty(PropertyName = "bri", NullValueHandling = NullValueHandling.Ignore)] //: 1,
         public byte? Bri { get => bri; set { if (value != bri) { bri = value; OnPropertyChanged(); } } }
-        [JsonProperty(PropertyName = "hue")] //: 33761,
+        [JsonProperty(PropertyName = "hue", NullValueHandling = NullValueHandling.Ignore)] //: 33761,
         public ushort? Hue { get => hue; set { if (value != hue) { hue = value; OnPropertyChanged(); } } }
-        [JsonProperty(PropertyName = "sat")] //: 254,
+        [JsonProperty(PropertyName = "sat", NullValueHandling = NullValueHandling.Ignore)] //: 254,
         public byte? Sat { get => sat; set { if (value != sat) { sat = value; OnPropertyChanged(); } } }
-        [JsonProperty(PropertyName = "xy")] //: [
+        [JsonProperty(PropertyName = "xy", NullValueHandling = NullValueHandling.Ignore)] //: [
         public float[] XY { get => xy; set { if (value != xy) { xy = value; OnPropertyChanged(); } } }
-        [JsonProperty(PropertyName = "ct")] //: 159,
+        [JsonProperty(PropertyName = "ct", NullValueHandling = NullValueHandling.Ignore)] //: 159,
         public ushort? CT { get => ct; set { if (value != ct) { ct = value; OnPropertyChanged(); } } }
-        [JsonProperty(PropertyName = "alert")] //: "none",
+        [JsonProperty(PropertyName = "alert", NullValueHandling = NullValueHandling.Ignore)] //: "none",
         public string Alert { get => alert; set { if (value != alert) { alert = value; OnPropertyChanged(); } } }
-        [JsonProperty(PropertyName = "effect")] //: "none",
+        [JsonProperty(PropertyName = "effect", NullValueHandling = NullValueHandling.Ignore)] //: "none",
         public string Effect { get => effect; set { if (value != effect) { effect = value; OnPropertyChanged(); } } }
-        [JsonProperty(PropertyName = "transitiontime")]
+        [JsonProperty(PropertyName = "transitiontime", NullValueHandling = NullValueHandling.Ignore)]
         public ushort? Transitiontime { get => transitiontime; set { if (value != transitiontime) { transitiontime = value; OnPropertyChanged(); } } }
-        [JsonProperty(PropertyName = "bri_inc")]
+        [JsonProperty(PropertyName = "bri_inc", NullValueHandling = NullValueHandling.Ignore)]
         public short? BriInc { get => bri_inc; set { if (value != bri_inc) { bri_inc = value; OnPropertyChanged(); } } }
-        [JsonProperty(PropertyName = "sat_inc")]
+        [JsonProperty(PropertyName = "sat_inc", NullValueHandling = NullValueHandling.Ignore)]
         public short? SatInc { get => sat_inc; set { if (value != sat_inc) { sat_inc = value; OnPropertyChanged(); } } }
-        [JsonProperty(PropertyName = "hue_inc")]
+        [JsonProperty(PropertyName = "hue_inc", NullValueHandling = NullValueHandling.Ignore)]
         public int? HueInc { get => hue_inc; set { if (value != hue_inc) { hue_inc = value; OnPropertyChanged(); } } }
-        [JsonProperty(PropertyName = "ct_inc")]
+        [JsonProperty(PropertyName = "ct_inc", NullValueHandling = NullValueHandling.Ignore)]
         public int? CtInc { get => ct_inc; set { if (value != ct_inc) { ct_inc = value; OnPropertyChanged(); } } }
-        [JsonProperty(PropertyName = "xy_inc")]
+        [JsonProperty(PropertyName = "xy_inc", NullValueHandling = NullValueHandling.Ignore)]
         public float? XyInc { get => xy_inc; set { if (value != xy_inc) { xy_inc = value; OnPropertyChanged(); } } }
-        [JsonProperty(PropertyName = "scene")]
+        [JsonProperty(PropertyName = "scene", NullValueHandling = NullValueHandling.Ignore)]
         public string Scene { get => scene; set { if (value != scene) { scene = value; OnPropertyChanged(); } } }
     }
 

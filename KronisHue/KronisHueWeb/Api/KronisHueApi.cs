@@ -12,6 +12,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
 using KronisHue;
+using KronisHueWeb.Classes;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -21,6 +22,15 @@ namespace KronisHueWeb
     [ApiController]
     public class KronisHueController : Controller
     {
+        private static async Task<IActionResult> Forward(HttpResponseMessage response)
+        {
+            var res = new ContentResult();
+            res.StatusCode = (int)response.StatusCode;
+            res.ContentType = response.Content.Headers.GetValues("Content-Type").FirstOrDefault();
+            res.Content = await response.Content.ReadAsStringAsync();
+            return res;
+        }
+
         // GET: api/<controller>
         [HttpPost("nonce")]
         public async Task<IActionResult> Nonce([FromBody] NonceInput data)
@@ -231,17 +241,31 @@ namespace KronisHueWeb
             }
         }
 
-        private async static Task<IActionResult> Forward(HttpResponseMessage response)
+        [HttpPut("lights/{id}/state")]
+        public async Task<IActionResult> PutLightState([FromBody] LightStateInput input, [FromRoute] int id)
         {
-            var res = new ContentResult();
-            res.StatusCode = (int)response.StatusCode;
-            res.ContentType = response.Content.Headers.GetValues("Content-Type").FirstOrDefault();
-            res.Content = await response.Content.ReadAsStringAsync();
-            return res;
+            using (HttpClient c = new HttpClient())
+            {
+                var uri = $"{input.ApiUrl}/lights/{id}/state";
+                ApplyAuthentication(c, input);
+                var response = await c.PutAsync(uri, new JsonContent(input.State));
+                return await Forward(response);
+            }
+        }
+
+        [HttpPut("groups/{id}/action")]
+        public async Task<IActionResult> PutGroupState([FromBody] GroupActionInput input, [FromRoute] int id)
+        {
+            using (HttpClient c = new HttpClient())
+            {
+                var uri = $"{input.ApiUrl}/groups/{id}/action";
+                ApplyAuthentication(c, input);
+
+                var response = await c.PutAsync(uri, new JsonContent(input.Action));
+                return await Forward(response);
+            }
         }
     }
-
-
 
     public class NonceInput
     {
@@ -288,6 +312,18 @@ namespace KronisHueWeb
         public string BaseUrl { get; set; }
 
         internal string ApiUrl => BaseUrl ?? $"https://api.meethue.com/bridge/{UserName}";
+    }
+
+    public class LightStateInput : ApiInput
+    {
+        [JsonProperty("state")]
+        public LightState State { get; set; }
+    }
+
+    public class GroupActionInput : ApiInput
+    {
+        [JsonProperty("action")]
+        public GroupAction Action { get; set; }
     }
 
     public class TokenResult

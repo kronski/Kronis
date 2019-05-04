@@ -14,26 +14,27 @@
     username: string | null;
 
     baseUrl: string = "";
+    localusername: string;
     autoRefreshState: boolean = false;
 };
 
-class LightState {
-    "on": boolean | null;
-    "bri": number | null;
-    "hue": number | null;
-    "sat": number | null;
-    "effect": string | null;
-    "xy": Array<number> | null;
-    "ct": number | null;
-    "alert": string | null;
-    "colormode": string | null;
-    "mode": string | null;
-    "reachable": boolean | null;
+export class LightState {
+    "on": boolean | undefined;
+    "bri": number | undefined;
+    "hue": number | undefined;
+    "sat": number | undefined;
+    "effect": string | undefined;
+    "xy": Array<number> | undefined;
+    "ct": number | undefined;
+    "alert": string | undefined;
+    "colormode": string | undefined;
+    "mode": string | undefined;
+    "reachable": boolean | undefined;
 }
 
 class LightSWUpdate {
-    "state": string | null;
-    "lastinstall": Date | null;
+    "state": string | undefined;
+    "lastinstall": Date | undefined;
 }
 
 class LightCapabilitiesControlCT {
@@ -84,16 +85,16 @@ class Lights {
     [id: string]: Light;
 }
 
-class GroupAction {
-    "on": boolean;
-    "bri": number;
-    "hue": number;
-    "sat": number;
-    "effect": string;
-    "xy": [number];
-    "ct": number;
-    "alert": string;
-    "colormode": string;
+export class GroupAction {
+    "on": boolean | undefined;
+    "bri": number | undefined;
+    "hue": number | undefined;
+    "sat": number | undefined;
+    "effect": string | undefined;
+    "xy": [number] | undefined;
+    "ct": number | undefined;
+    "alert": string | undefined;
+    "colormode": string | undefined;
 }
 
 class Group {
@@ -350,7 +351,7 @@ export class KronisHue {
         });
     }
 
-    async registerLocalHue(): Promise<boolean|null> {
+    async registerLocalHue() {
         return fetch("/api/kronishue/registerLocalHue", {
             method: "POST",
             headers: {
@@ -359,30 +360,27 @@ export class KronisHue {
             body: JSON.stringify(this.getApiInput())
         }).then((response) => {
             if (!response.ok)
-                return null;
+                throw "Request failed"
 
-            return response.json().then<boolean|null>((data) => {
-                if (!data) return false;
-                if (data.length == 0) return false;
-                if (!data[0]) return false;
-                if (!data[0].success) return false;
-                if (!data[0].success.username) return false;
-
-                this.data.baseUrl += "/" + data[0].success.username;
-                
-                return true;
+            return response.json().then((data) => {
+                if (data && data[0] && data[0].error && data[0].error.description)
+                    throw data[0].error.description;
+                if (!data || !data[0] || !data[0].success || !data[0].success.username)
+                    throw "Invalid result";
+                this.data.localusername = data[0].success.username;
+                this.saveAnyToLocalStorage(localStorageDataKey, this.data);
             });
-        }).catch(() => {
-            return null;
         });
     }
 
     private getApiInput() {
-        let hasbaseurl = this.data.baseUrl.length == 0;
+        let baseurl = this.data.baseUrl;
+        if (baseurl && this.data.localusername)
+            baseurl += "/" + this.data.localusername
         return {
-            token: hasbaseurl ? this.data.access_token : null,
-            username: hasbaseurl ? this.data.username : null,
-            baseUrl: this.data.baseUrl
+            token: !baseurl ? this.data.access_token : null,
+            username: !baseurl ? this.data.username : null,
+            baseUrl: baseurl
         }
     }
 
@@ -446,5 +444,47 @@ export class KronisHue {
         }).catch(() => {
             return null;
         });
+    }
+
+    async setLightState(id: number, state: LightState) {
+        let data:any = this.getApiInput();
+        data.state = state;
+
+        return fetch(`/api/kronishue/lights/${id}/state`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data)
+        }).then((response) => {
+            if (response.ok) {
+                return response.json().then(() => {
+                    return data;
+                })
+            }
+            else
+                throw "Failed";
+        })
+    }
+
+    async setGroupAction(id: number, action: GroupAction) {
+        let data: any = this.getApiInput();
+        data.action = action;
+
+        return fetch(`/api/kronishue/groups/${id}/action`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data)
+        }).then((response) => {
+            if (response.ok) {
+                return response.json().then(() => {
+                    return data;
+                })
+            }
+            else
+                throw "Failed";
+        })
     }
 }

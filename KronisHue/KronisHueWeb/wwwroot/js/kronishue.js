@@ -13,7 +13,7 @@ class KronisHueData {
     }
 }
 ;
-class LightState {
+export class LightState {
 }
 class LightSWUpdate {
 }
@@ -31,7 +31,7 @@ class Light {
 }
 class Lights {
 }
-class GroupAction {
+export class GroupAction {
 }
 class Group {
 }
@@ -258,32 +258,26 @@ export class KronisHue {
                 body: JSON.stringify(this.getApiInput())
             }).then((response) => {
                 if (!response.ok)
-                    return null;
+                    throw "Request failed";
                 return response.json().then((data) => {
-                    if (!data)
-                        return false;
-                    if (data.length == 0)
-                        return false;
-                    if (!data[0])
-                        return false;
-                    if (!data[0].success)
-                        return false;
-                    if (!data[0].success.username)
-                        return false;
-                    this.data.baseUrl += "/" + data[0].success.username;
-                    return true;
+                    if (data && data[0] && data[0].error && data[0].error.description)
+                        throw data[0].error.description;
+                    if (!data || !data[0] || !data[0].success || !data[0].success.username)
+                        throw "Invalid result";
+                    this.data.localusername = data[0].success.username;
+                    this.saveAnyToLocalStorage(localStorageDataKey, this.data);
                 });
-            }).catch(() => {
-                return null;
             });
         });
     }
     getApiInput() {
-        let hasbaseurl = this.data.baseUrl.length == 0;
+        let baseurl = this.data.baseUrl;
+        if (baseurl && this.data.localusername)
+            baseurl += "/" + this.data.localusername;
         return {
-            token: hasbaseurl ? this.data.access_token : null,
-            username: hasbaseurl ? this.data.username : null,
-            baseUrl: this.data.baseUrl
+            token: !baseurl ? this.data.access_token : null,
+            username: !baseurl ? this.data.username : null,
+            baseUrl: baseurl
         };
     }
     getLights(refresh = false) {
@@ -339,6 +333,48 @@ export class KronisHue {
                     return null;
             }).catch(() => {
                 return null;
+            });
+        });
+    }
+    setLightState(id, state) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let data = this.getApiInput();
+            data.state = state;
+            return fetch(`/api/kronishue/lights/${id}/state`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data)
+            }).then((response) => {
+                if (response.ok) {
+                    return response.json().then(() => {
+                        return data;
+                    });
+                }
+                else
+                    throw "Failed";
+            });
+        });
+    }
+    setGroupAction(id, action) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let data = this.getApiInput();
+            data.action = action;
+            return fetch(`/api/kronishue/groups/${id}/action`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data)
+            }).then((response) => {
+                if (response.ok) {
+                    return response.json().then(() => {
+                        return data;
+                    });
+                }
+                else
+                    throw "Failed";
             });
         });
     }

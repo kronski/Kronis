@@ -145,11 +145,11 @@ namespace KronisHueWeb
             using (HttpClient c = new HttpClient())
             {
                 c.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", input.Token);
-                var response = await c.PutAsJsonAsync("https://api.meethue.com/bridge/0/config",new { linkbutton=true });
+                var response = await c.PutAsync("https://api.meethue.com/bridge/0/config",new JsonContent(new { linkbutton=true }));
                 if (!response.IsSuccessStatusCode)
                     return StatusCode((int)response.StatusCode);
 
-                response = await c.PostAsJsonAsync("https://api.meethue.com/bridge/", new { devicetype = input.DeviceType });
+                response = await c.PostAsync("https://api.meethue.com/bridge/", new JsonContent(new { devicetype = input.DeviceType }));
                 if (!response.IsSuccessStatusCode)
                     return StatusCode((int)response.StatusCode);
                 var stringResponse = await response.Content.ReadAsStringAsync();
@@ -236,7 +236,7 @@ namespace KronisHueWeb
             using (HttpClient c = new HttpClient())
             {
                 // {"devicetype":"my_hue_app#iphone peter"}
-                var response = await c.PostAsJsonAsync(input.BaseUrl, new { devicetype = "KronisHueWeb" });
+                var response = await c.PostAsync(input.BaseUrl, new JsonContent(new { devicetype = "KronisHueWeb" }));
                 return await Forward(response);
             }
         }

@@ -117,156 +117,144 @@ export class KronisHue {
         }
     }
     refreshNonce() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return fetch('/api/kronishue/nonce', {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ code: this.data.code })
-            }).then((response) => {
-                return response.text().then((nonce) => {
-                    this.data.nonce = nonce;
-                    this.saveAnyToLocalStorage(localStorageDataKey, this.data);
-                    return this.data.nonce;
-                });
-            }).catch(() => {
-                this.data.nonce = null;
+        return fetch('/api/kronishue/nonce', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ code: this.data.code })
+        }).then((response) => {
+            return response.text().then((nonce) => {
+                this.data.nonce = nonce;
                 this.saveAnyToLocalStorage(localStorageDataKey, this.data);
                 return this.data.nonce;
             });
+        }).catch(() => {
+            this.data.nonce = null;
+            this.saveAnyToLocalStorage(localStorageDataKey, this.data);
+            return this.data.nonce;
         });
     }
     getTokenWithDigest() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return fetch("/api/kronishue/token", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    nonce: this.data.nonce,
-                    code: this.data.code
-                })
-            }).then((response) => {
-                if (response.ok) {
-                    return response.json().then((data) => {
-                        this.data.access_token = data.access_token;
-                        this.data.access_token_expires_in = data.access_token_expires_in;
-                        this.data.refresh_token = data.refresh_token;
-                        this.data.refresh_token_expires_in = data.refresh_token_expires_in;
-                        this.data.token_type = data.token_type;
-                        this.saveAnyToLocalStorage(localStorageDataKey, this.data);
-                        return data;
-                    });
-                }
-            }).catch(() => {
-                return null;
-            });
+        return fetch("/api/kronishue/token", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                nonce: this.data.nonce,
+                code: this.data.code
+            })
+        }).then((response) => {
+            if (response.ok) {
+                return response.json().then((data) => {
+                    this.data.access_token = data.access_token;
+                    this.data.access_token_expires_in = data.access_token_expires_in;
+                    this.data.refresh_token = data.refresh_token;
+                    this.data.refresh_token_expires_in = data.refresh_token_expires_in;
+                    this.data.token_type = data.token_type;
+                    this.saveAnyToLocalStorage(localStorageDataKey, this.data);
+                    return data;
+                });
+            }
+        }).catch(() => {
+            return null;
         });
     }
     refreshTokenWithDigest() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return fetch("/api/kronishue/refreshtoken", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    nonce: this.data.nonce,
-                    code: this.data.code,
-                    refresh_token: this.data.refresh_token
-                })
-            }).then((response) => {
-                if (response.ok) {
-                    return response.json().then((data) => {
-                        this.data.access_token = data.access_token;
-                        this.data.access_token_expires_in = data.access_token_expires_in;
-                        this.data.refresh_token = data.refresh_token;
-                        this.data.refresh_token_expires_in = data.refresh_token_expires_in;
-                        this.data.token_type = data.token_type;
-                        this.saveAnyToLocalStorage(localStorageDataKey, this.data);
-                        return data;
-                    });
-                }
-            }).catch(() => {
-                return null;
-            });
+        return fetch("/api/kronishue/refreshtoken", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                nonce: this.data.nonce,
+                code: this.data.code,
+                refresh_token: this.data.refresh_token
+            })
+        }).then((response) => {
+            if (response.ok) {
+                return response.json().then((data) => {
+                    this.data.access_token = data.access_token;
+                    this.data.access_token_expires_in = data.access_token_expires_in;
+                    this.data.refresh_token = data.refresh_token;
+                    this.data.refresh_token_expires_in = data.refresh_token_expires_in;
+                    this.data.token_type = data.token_type;
+                    this.saveAnyToLocalStorage(localStorageDataKey, this.data);
+                    return data;
+                });
+            }
+        }).catch(() => {
+            return null;
         });
     }
     setDeviceType() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return fetch("/api/kronishue/setdevicetype", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    token: this.data.access_token,
-                    devicetype: "kronishueweb"
-                })
-            }).then((response) => {
-                if (response.ok) {
-                    return response.json().then((data) => {
-                        this.data.username = data.username;
-                        this.saveAnyToLocalStorage(localStorageDataKey, this.data);
-                        return data;
-                    });
-                }
-            }).catch(() => {
-                return null;
-            });
+        return fetch("/api/kronishue/setdevicetype", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                token: this.data.access_token,
+                devicetype: "kronishueweb"
+            })
+        }).then((response) => {
+            if (response.ok) {
+                return response.json().then((data) => {
+                    this.data.username = data.username;
+                    this.saveAnyToLocalStorage(localStorageDataKey, this.data);
+                    return data;
+                });
+            }
+        }).catch(() => {
+            return null;
         });
     }
     locateHue() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return fetch("/api/kronishue/locateHue", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({})
-            }).then((response) => {
-                if (response.ok) {
-                    return response.json().then((data) => {
-                        if (data) {
-                            let items = data;
-                            if (items.length > 0) {
-                                let ip = items[0];
-                                this.data.baseUrl = `http://${ip}/api`;
-                                this.saveAnyToLocalStorage(localStorageDataKey, this.data);
-                                return this.data.baseUrl;
-                            }
+        return fetch("/api/kronishue/locateHue", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({})
+        }).then((response) => {
+            if (response.ok) {
+                return response.json().then((data) => {
+                    if (data) {
+                        let items = data;
+                        if (items.length > 0) {
+                            let ip = items[0];
+                            this.data.baseUrl = `http://${ip}/api`;
+                            this.saveAnyToLocalStorage(localStorageDataKey, this.data);
+                            return this.data.baseUrl;
                         }
-                        return null;
-                    });
-                }
-                else
+                    }
                     return null;
-            }).catch(() => {
+                });
+            }
+            else
                 return null;
-            });
+        }).catch(() => {
+            return null;
         });
     }
     registerLocalHue() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return fetch("/api/kronishue/registerLocalHue", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(this.getApiInput())
-            }).then((response) => {
-                if (!response.ok)
-                    throw "Request failed";
-                return response.json().then((data) => {
-                    if (data && data[0] && data[0].error && data[0].error.description)
-                        throw data[0].error.description;
-                    if (!data || !data[0] || !data[0].success || !data[0].success.username)
-                        throw "Invalid result";
-                    this.data.localusername = data[0].success.username;
-                    this.saveAnyToLocalStorage(localStorageDataKey, this.data);
-                });
+        return fetch("/api/kronishue/registerLocalHue", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(this.getApiInput())
+        }).then((response) => {
+            if (!response.ok)
+                throw "Request failed";
+            return response.json().then((data) => {
+                if (data && data[0] && data[0].error && data[0].error.description)
+                    throw data[0].error.description;
+                if (!data || !data[0] || !data[0].success || !data[0].success.username)
+                    throw "Invalid result";
+                this.data.localusername = data[0].success.username;
+                this.saveAnyToLocalStorage(localStorageDataKey, this.data);
             });
         });
     }
@@ -337,45 +325,118 @@ export class KronisHue {
         });
     }
     setLightState(id, state) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let data = this.getApiInput();
-            data.state = state;
-            return fetch(`/api/kronishue/lights/${id}/state`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(data)
-            }).then((response) => {
-                if (response.ok) {
-                    return response.json().then(() => {
-                        return data;
-                    });
-                }
-                else
-                    throw "Failed";
-            });
+        let data = this.getApiInput();
+        data.state = state;
+        return fetch(`/api/kronishue/lights/${id}/state`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data)
+        }).then((response) => {
+            if (response.ok) {
+                return response.json().then((data) => {
+                    if (Array.isArray(data)) {
+                        for (let obj of data) {
+                            if (obj && obj.success) {
+                                for (let key in obj.success) {
+                                    let pat = /\/lights\/(\d+)\/state\/(\w+)/;
+                                    let res = pat.exec(key);
+                                    if (res !== null) {
+                                        let id = res[1];
+                                        let prop = res[2];
+                                        if (this.lights &&
+                                            this.lights[id]) {
+                                            let state = this.lights[id].state;
+                                            if (state)
+                                                state[prop] = obj.success[key];
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    this.refreshGroupsActions();
+                    return data;
+                });
+            }
+            else
+                throw "Failed";
         });
     }
-    setGroupAction(id, action) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let data = this.getApiInput();
-            data.action = action;
-            return fetch(`/api/kronishue/groups/${id}/action`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(data)
-            }).then((response) => {
-                if (response.ok) {
-                    return response.json().then(() => {
-                        return data;
-                    });
+    refreshGroupsActions() {
+        for (let g of Object.keys(this.groups)) {
+            let grp = this.groups[g];
+            let all_on;
+            let all_off;
+            for (let l of grp.lights) {
+                let light = this.lights[l];
+                if (light.state) {
+                    if (all_on === undefined)
+                        all_on = light.state.on;
+                    else
+                        all_on = all_on && light.state.on;
+                    if (all_off === undefined)
+                        all_off = !light.state.on;
+                    else
+                        all_off = all_off && !light.state.on;
                 }
-                else
-                    throw "Failed";
-            });
+            }
+            if (all_on)
+                grp.action.on = true;
+            if (all_off)
+                grp.action.on = false;
+        }
+    }
+    refreshLightStates(grp) {
+        for (let l of grp.lights) {
+            let light = this.lights[l];
+            if (light.state) {
+                light.state.on = grp.action.on;
+            }
+        }
+    }
+    setGroupAction(id, action) {
+        let data = this.getApiInput();
+        data.action = action;
+        return fetch(`/api/kronishue/groups/${id}/action`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data)
+        }).then((response) => {
+            if (response.ok) {
+                return response.json().then((data) => {
+                    if (Array.isArray(data)) {
+                        for (let obj of data) {
+                            if (obj && obj.success) {
+                                for (let key in obj.success) {
+                                    let pat = /\/groups\/(\d+)\/action\/(\w+)/;
+                                    let res = pat.exec(key);
+                                    if (res !== null) {
+                                        let id = res[1];
+                                        let prop = res[2];
+                                        if (this.groups &&
+                                            this.groups[id]) {
+                                            let action = this.groups[id].action;
+                                            if (action) {
+                                                action[prop] = obj.success[key];
+                                                if (prop === "on") {
+                                                    this.refreshLightStates(this.groups[id]);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return data;
+                });
+            }
+            else
+                throw "Failed";
         });
     }
 }

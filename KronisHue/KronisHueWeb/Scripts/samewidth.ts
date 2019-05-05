@@ -15,7 +15,6 @@ namespace SameWidth {
     });
 
 
-    export var sameWidthBody = function () {
-        jQuery('body').sameWidth();
+    export var sameWidthFunc = function () {
     }
 }

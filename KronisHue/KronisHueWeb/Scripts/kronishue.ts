@@ -115,13 +115,13 @@ const localStorageDataKey = "kronisHueData",
 
 export class KronisHue {
     data: KronisHueData;
-    lights: Lights; 
+    lights: Lights;
     groups: Groups;
     useLocalstorage: boolean;
 
     constructor(useLocalstorage: boolean = true) {
         this.useLocalstorage = useLocalstorage;
-        
+
         this.loadFromLocalStorage();
     }
 
@@ -139,7 +139,7 @@ export class KronisHue {
         this.groups = this.loadAnyFromLocalStorage(localStorageGroupsKey) || new Groups();
     }
 
-    loadAnyFromLocalStorage(key: string):any {
+    loadAnyFromLocalStorage(key: string): any {
         let jsonstr = window.localStorage.getItem(key);
         return (jsonstr) ? JSON.parse(jsonstr) : null;
     }
@@ -148,7 +148,7 @@ export class KronisHue {
         this.saveAnyToLocalStorage(localStorageDataKey, this.data);
     }
 
-    private saveAnyToLocalStorage(key:string, data:any) {
+    private saveAnyToLocalStorage(key: string, data: any) {
         if (!this.useLocalstorage)
             return;
 
@@ -213,7 +213,7 @@ export class KronisHue {
         }
     }
 
-    async refreshNonce() {
+    refreshNonce() {
         return fetch('/api/kronishue/nonce', {
             method: "POST",
             headers: {
@@ -233,7 +233,7 @@ export class KronisHue {
         });
     }
 
-    async getTokenWithDigest() {
+    getTokenWithDigest() {
         return fetch("/api/kronishue/token", {
             method: "POST",
             headers: {
@@ -262,7 +262,7 @@ export class KronisHue {
         });
 
     }
-    async refreshTokenWithDigest() {
+    refreshTokenWithDigest() {
         return fetch("/api/kronishue/refreshtoken", {
             method: "POST",
             headers: {
@@ -294,7 +294,7 @@ export class KronisHue {
     }
 
 
-    async setDeviceType() {
+    setDeviceType() {
         return fetch("/api/kronishue/setdevicetype", {
             method: "POST",
             headers: {
@@ -319,7 +319,7 @@ export class KronisHue {
         });
     }
 
-    async locateHue(): Promise<string | null> {
+    locateHue(): Promise<string | null> {
         return fetch("/api/kronishue/locateHue", {
             method: "POST",
             headers: {
@@ -338,9 +338,9 @@ export class KronisHue {
                             this.saveAnyToLocalStorage(localStorageDataKey, this.data);
                             return this.data.baseUrl;
                         }
-                        
+
                     }
-                        
+
                     return null;
                 });
             }
@@ -351,7 +351,7 @@ export class KronisHue {
         });
     }
 
-    async registerLocalHue() {
+    registerLocalHue() {
         return fetch("/api/kronishue/registerLocalHue", {
             method: "POST",
             headers: {
@@ -435,7 +435,7 @@ export class KronisHue {
                     }
 
                     this.saveAnyToLocalStorage(localStorageGroupsKey, this.groups);
-                    
+
                     return data;
                 });
             }
@@ -446,8 +446,8 @@ export class KronisHue {
         });
     }
 
-    async setLightState(id: number, state: LightState) {
-        let data:any = this.getApiInput();
+    setLightState(id: number, state: LightState) {
+        let data: any = this.getApiInput();
         data.state = state;
 
         return fetch(`/api/kronishue/lights/${id}/state`, {
@@ -458,7 +458,31 @@ export class KronisHue {
             body: JSON.stringify(data)
         }).then((response) => {
             if (response.ok) {
-                return response.json().then(() => {
+                return response.json().then((data) => {
+                    if (Array.isArray(data)) {
+                        for (let obj of data) {
+                            if (obj && obj.success) {
+                                for (let key in obj.success) {
+                                    let pat = /\/lights\/(\d+)\/state\/(\w+)/;
+                                    let res = pat.exec(key)
+                                    if (res !== null) {
+                                        let id = res[1]
+                                        let prop = res[2]
+
+                                        if (this.lights &&
+                                            this.lights[id]) {
+                                            let state = this.lights[id].state
+                                            if (state)
+                                                state[prop] = obj.success[key];
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    this.refreshGroupsActions();
+
                     return data;
                 })
             }
@@ -467,7 +491,46 @@ export class KronisHue {
         })
     }
 
-    async setGroupAction(id: number, action: GroupAction) {
+    refreshGroupsActions() {
+        for (let g of Object.keys(this.groups)) {
+            let grp = this.groups[g];
+
+            let all_on: boolean | undefined;
+            let all_off: boolean | undefined;
+
+            for (let l of grp.lights) {
+                let light = this.lights[l];
+
+                if (light.state) {
+                    if (all_on === undefined)
+                        all_on = light.state.on;
+                    else
+                        all_on = all_on && light.state.on;
+
+                    if (all_off === undefined)
+                        all_off = !light.state.on;
+                    else
+                        all_off = all_off && !light.state.on;
+                }
+            }
+            if (all_on)
+                grp.action.on = true;
+            if (all_off)
+                grp.action.on = false;
+        }
+    }
+
+    refreshLightStates(grp:Group) {
+        for (let l of grp.lights) {
+            let light = this.lights[l];
+
+            if (light.state) {
+                light.state.on = grp.action.on;
+            }
+        }
+    }
+
+    setGroupAction(id: number, action: GroupAction) {
         let data: any = this.getApiInput();
         data.action = action;
 
@@ -479,7 +542,33 @@ export class KronisHue {
             body: JSON.stringify(data)
         }).then((response) => {
             if (response.ok) {
-                return response.json().then(() => {
+                return response.json().then((data) => {
+                    if (Array.isArray(data)) {
+                        for (let obj of data) {
+                            if (obj && obj.success) {
+                                for (let key in obj.success) {
+                                    let pat = /\/groups\/(\d+)\/action\/(\w+)/;
+                                    let res = pat.exec(key)
+                                    if (res !== null) {
+                                        let id = res[1]
+                                        let prop = res[2]
+
+                                        if (this.groups &&
+                                            this.groups[id]) {
+                                            let action = this.groups[id].action
+                                            if (action) {
+                                                action[prop] = obj.success[key];
+                                                if (prop === "on") {
+                                                    this.refreshLightStates(this.groups[id])
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     return data;
                 })
             }

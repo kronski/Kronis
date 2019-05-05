@@ -17,10 +17,9 @@
                     {{ group.name }}
                 </button>
                 <div class="material-switch pull-right float-right">
-                    <input class="groupswitch" id="groupSwitchOnOff{{ group.id }}" data-id="{{ group.id }}" {{#if group.action.on}}checked{{/if}} type="checkbox" />
-                    <label for="groupSwitchOnOff{{ group.id }}" class="label-default"></label>
+                    <input class="groupswitch" id="groupSwitch{{ group.id }}" data-id="{{ group.id }}" {{#if group.action.on}} checked{{/if}} type="checkbox" />
+                    <label for="groupSwitch{{ group.id }}" class="label-default"></label>
                 </div>
-
             </div>
 
             <div id="collapse{{ group.id }}" class="collapse hide" aria-labelledby="headingOne" data-parent="#accordionExample">
@@ -32,11 +31,15 @@
                                 {{ name }}
                             </div>
                             <div class="card-body">
-                                <div class="material-switch pull-right float-right">
-                                    <input class="lightswitch" id="lightSwitchOnOff{{ id }}" data-id="{{ id }}" {{#if state.on}} checked{{/if}} type="checkbox" />
-                                    <label for="lightSwitchOnOff{{ id }}" class="label-default"></label>
+                                <label for="lightSwitch{{ id }}">On</label>
+                                <div class="material-switch pull-right">
+                                    <input class="lightswitch" id="lightSwitch{{ id }}" data-id="{{ id }}" {{#if state.on}} checked{{/if}} type="checkbox" />
+                                    <label for="lightSwitch{{ id }}" class="label-default"></label>
                                 </div>
-                                <button type="button" class="btn btn-light border-secondary">Properties</button>
+                                <label for="lightHue{{ id }}">Hue</label>
+                                <input type="range" class="custom-range lighthue" min="0" max="65535" id="lightHue{{ group.id }}" data-id="{{ id }}" value="{{state.hue}}">
+                                <label for="lightSat{{ id }}">Saturation</label>
+                                <input type="range" class="custom-range lightsat" min="0" max="255" id="lightSat{{ group.id }}" data-id="{{ id }}" value="{{state.sat}}">
                             </div>
                         </div>
                         {{/each}}

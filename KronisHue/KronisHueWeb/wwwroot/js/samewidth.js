@@ -11,8 +11,7 @@ var SameWidth;
             return this.width(maxwidth);
         }
     });
-    SameWidth.sameWidthBody = function () {
-        jQuery('body').sameWidth();
+    SameWidth.sameWidthFunc = function () {
     };
 })(SameWidth || (SameWidth = {}));
 //# sourceMappingURL=samewidth.js.map

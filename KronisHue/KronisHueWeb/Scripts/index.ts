@@ -74,7 +74,28 @@ $(function () {
             state.on = checked;
 
             hue.setLightState(parseInt(id), state)
-            
+        }
+        else if (source.hasClass("lighthue")) {
+            let id = source.attr("data-id");
+            if (!id) return;
+
+            let state = new LightState();
+            let val = source.val();
+            if (!val) return;
+            state.hue = parseInt(<string>val);
+
+            hue.setLightState(parseInt(id), state)
+        }
+        else if (source.hasClass("lightsat")) {
+            let id = source.attr("data-id");
+            if (!id) return;
+
+            let state = new LightState();
+            let val = source.val();
+            if (!val) return;
+            state.sat = parseInt(<string>val);
+
+            hue.setLightState(parseInt(id), state)
         }
         else if (source.hasClass("groupswitch")) {
             let id = source.attr("data-id");

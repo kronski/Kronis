@@ -29,10 +29,13 @@ const server = http.createServer((req, res) => {
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/plain');
     res.end('Hello World\n');
-});
-server.listen(settings.serverport, settings.serverinterface, () => {
+}).on('listening', () => {
     console.log(`Server running at http://${settings.serverinterface}:${settings.serverport}/`);
-});
+}).on('close', () => {
+    console.info('server closed');
+}).on('error', (err) => {
+    console.error(err);
+}).listen(settings.serverport, settings.serverinterface);
 function registerOnHue() {
     fetch(`http://${settings.huebridgeip}/api`, {
         method: "POST",
@@ -74,22 +77,22 @@ function loadSettings() {
     });
 }
 function checkHueForChange() {
-    if (settings.username !== undefined) {
-    }
 }
+var mainTimeout;
 function mainfunc() {
+    mainTimeout = undefined;
     if (settings.username === undefined) {
         console.log("Register app on hue bridge");
         registerOnHue();
         if (settings.username === undefined) {
-            setTimeout(mainfunc, 5000);
+            mainTimeout = setTimeout(mainfunc, 5000);
             return;
         }
     }
     if (settings.username !== undefined) {
         console.log("Fetching changes from hue bridge");
         checkHueForChange();
-        setTimeout(mainfunc, 60000);
+        mainTimeout = setTimeout(mainfunc, 60000);
         return;
     }
 }
@@ -99,5 +102,17 @@ function initapp() {
         mainfunc();
     });
 }
+process.stdin.resume();
+process.on('SIGINT', function () {
+    if (mainTimeout !== undefined) {
+        console.log("Stopping main");
+        clearTimeout(mainTimeout);
+    }
+    server.close();
+    server.close(function () {
+        console.log("Finished all requests");
+        process.exit(0);
+    });
+});
 initapp();
 //# sourceMappingURL=huelogger.js.map
